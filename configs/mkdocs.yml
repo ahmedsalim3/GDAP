@@ -1,0 +1,6 @@
+site_name: Stemaway Project Template Site [Edit this]
+theme:
+  name: material
+
+nav:
+  - Home: index.md
