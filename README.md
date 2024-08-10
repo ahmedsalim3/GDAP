@@ -2,8 +2,8 @@
 
 This project is composed of three levels:
 - Level 1: develop binary classification model focusing on only one disease (diabetes mellitus or breast cancer)
-- Level 2: integrate score/confidence level based on how much and type of evidence from OpenTargets and StringDB
-- Level 3: generalize model to work with multiple diseases
+- Level 2: integrate score/confidence level based on how much and type of evidence from OpenTargets and StringDB.
+- Level 3: generalize model to work with multiple diseases.
 
 
 ## Requirements
@@ -11,7 +11,7 @@ This project is composed of three levels:
 To install and run the project, you will need:
 - **Python 3.x**: Ensure you have Python 3.x installed. You can download it from [python.org](https://www.python.org/).
 - **pip**: Python package installer should be available.
-- **Dependencies**: The project requires the Python packages listed in [requirements.txt](requirements.txt)
+- **Dependencies**: The project requires the Python packages listed in [requirements.txt](requirements.txt).
 
 ## How to install
 
