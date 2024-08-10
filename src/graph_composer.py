@@ -117,6 +117,5 @@ class GraphComposer:
         self.process_string_data()
         self.compose_graphs()
         self.get_merged_dataframe()
-        if plot:
-            self.visualize_graphs(plot=True, save=None, filename=None, save=None)
-            self.plot_community_detection(plot=True, save=False, filename=None, save=None)
+        self.visualize_graphs(plot=plot, filename=filename, save=save)
+        self.plot_community_detection(plot=plot, filename=filename, save=save)
