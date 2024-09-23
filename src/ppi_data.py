@@ -38,6 +38,7 @@ class PPIData:
         # Rename the 'experimental' column to 'combined_score'
         ppi_df.rename(columns={'experimental': 'combined_score'}, inplace=True)
         ppi_df.sort_values(by='combined_score', ascending=False, inplace=True)
+        ppi_df.reset_index(drop=True, inplace=True)
         
         print(f"Final PPI data shape: {ppi_df.shape}")
         return ppi_df
