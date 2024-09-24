@@ -107,3 +107,7 @@ def download_graph_files():
     )
 
 
+def update_process_tracker(stage, status):
+    if 'process_tracker' not in st.session_state:
+        st.session_state['process_tracker'] = {}
+    st.session_state['process_tracker'][stage] = status
