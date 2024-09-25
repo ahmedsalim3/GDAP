@@ -6,7 +6,10 @@ import networkx as nx
 import pandas as pd
 import numpy as np
 import io
-     
+import random
+from networkx.algorithms import community
+import matplotlib.pyplot as plt
+
 @st.cache_data
 def fetch_graphql_data(disease_id):
     graphql_client = GraphQLClient()
@@ -47,7 +50,33 @@ def init_values(key, value=None):
     if key not in st.session_state:
         st.session_state[key] = value
       
-
+def initialize_session_state():
+    # datasets
+    init_values('previous_disease_id', None)
+    init_values('disease_name', None)
+    init_values('ot_df', None)
+    init_values('ppi_df', None)
+    init_values('ot_csv', None)
+    init_values('ppi_csv', None)
+    # graphs
+    init_values('graph', None)
+    init_values("graph_created", False)
+    init_values('positive_edges', None)
+    init_values('negative_edges', None)
+    # embeddings
+    init_values('embedding_model', None)
+    init_values('embedding', None)
+    init_values('X', None)
+    init_values('y', None)
+    # dat splitting
+    init_values("X_train", None)
+    init_values("y_train", None)
+    init_values("X_val", None)
+    init_values("y_val", None)
+    init_values("X_test", None)
+    init_values("y_test", None)
+    # classifier
+    init_values("classifier", None)
 
 def prepare_graph_files_in_memory(G, positive_edges, negative_edges):
     # Prepare the files in memory
@@ -111,3 +140,30 @@ def update_process_tracker(stage, status):
     if 'process_tracker' not in st.session_state:
         st.session_state['process_tracker'] = {}
     st.session_state['process_tracker'][stage] = status
+
+def visualize_graph(sample_size=300):
+    G = st.session_state['graph']
+    disease_name = st.session_state['disease_name']
+    disease_nodes = [n for n in G.nodes if isinstance(n, str) and disease_name in n.lower()]
+    selected_disease_node = random.choice(disease_nodes)
+    remaining_nodes_sample = random.sample([n for n in G.nodes if n != selected_disease_node], sample_size - 1)
+    sampled_nodes = [selected_disease_node] + remaining_nodes_sample
+    sampled_graph = G.subgraph(sampled_nodes)
+    communities = community.greedy_modularity_communities(sampled_graph)
+    colors = [0] * sampled_graph.number_of_nodes()
+    for i, comm in enumerate(communities):
+        for node in comm:
+            colors[list(sampled_graph.nodes()).index(node)] = i
+    
+    plt.figure(figsize=(20, 10))
+    pos = nx.spring_layout(sampled_graph, seed=42, k=0.7, iterations=100)
+    nx.draw_networkx(sampled_graph, 
+            pos, with_labels=True, 
+            node_color=colors, 
+            cmap=plt.cm.jet, edge_color="gray", node_size=2000, arrows=True, font_size=10, font_weight="bold")
+    
+    edge_labels = nx.get_edge_attributes(sampled_graph, 'weight')
+    edge_labels = {k: f"{v:.3f}" for k, v in edge_labels.items()}  # Format weights to .3f decimal
+    nx.draw_networkx_edge_labels(sampled_graph, pos, edge_labels=edge_labels, font_color='red')
+    plt.title(f"Sample graph with {sample_size} nodes for {disease_name} disease\n Original {len(G)} Nodes", fontsize=12, fontweight='bold')
+    st.pyplot(plt)
