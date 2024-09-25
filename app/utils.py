@@ -143,11 +143,13 @@ def update_process_tracker(stage, status):
 
 def visualize_graph(sample_size=300):
     G = st.session_state['graph']
-    disease_name = st.session_state['disease_name']
-    disease_nodes = [n for n in G.nodes if isinstance(n, str) and disease_name in n.lower()]
-    selected_disease_node = random.choice(disease_nodes)
-    remaining_nodes_sample = random.sample([n for n in G.nodes if n != selected_disease_node], sample_size - 1)
-    sampled_nodes = [selected_disease_node] + remaining_nodes_sample
+    disease_name = st.session_state['disease_name'].lower()
+    disease_node = next((n for n in G.nodes if isinstance(n, str) and disease_name in n.lower()), None)
+    if disease_node:
+        remaining_nodes_sample = random.sample([n for n in G.nodes if n != disease_node], min(sample_size - 1, len(G) - 1))
+        sampled_nodes = [disease_node] + remaining_nodes_sample
+    else:
+        sampled_nodes = random.sample(list(G.nodes), min(sample_size, len(G)))
     sampled_graph = G.subgraph(sampled_nodes)
     communities = community.greedy_modularity_communities(sampled_graph)
     colors = [0] * sampled_graph.number_of_nodes()
@@ -158,12 +160,13 @@ def visualize_graph(sample_size=300):
     plt.figure(figsize=(20, 10))
     pos = nx.spring_layout(sampled_graph, seed=42, k=0.7, iterations=100)
     nx.draw_networkx(sampled_graph, 
-            pos, with_labels=True, 
-            node_color=colors, 
-            cmap=plt.cm.jet, edge_color="gray", node_size=2000, arrows=True, font_size=10, font_weight="bold")
+                     pos, with_labels=True, 
+                     node_color=colors, 
+                     cmap=plt.cm.jet, edge_color="gray", node_size=2000, arrows=True, font_size=10, font_weight="bold")
     
     edge_labels = nx.get_edge_attributes(sampled_graph, 'weight')
-    edge_labels = {k: f"{v:.3f}" for k, v in edge_labels.items()}  # Format weights to .3f decimal
+    edge_labels = {k: f"{v:.3f}" for k, v in edge_labels.items()} 
     nx.draw_networkx_edge_labels(sampled_graph, pos, edge_labels=edge_labels, font_color='red')
-    plt.title(f"Sample graph with {sample_size} nodes for {disease_name} disease\n Original {len(G)} Nodes", fontsize=12, fontweight='bold')
+    title = f"Sample graph with {sample_size} nodes for {disease_name} disease\nOriginal graph has {len(G)} nodes"
+    plt.title(title, fontsize=12, fontweight='bold')
     st.pyplot(plt)
