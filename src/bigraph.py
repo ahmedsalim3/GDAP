@@ -4,6 +4,9 @@ import random
 import numpy as np
 import os
 from tqdm import tqdm
+import random
+from networkx.algorithms import community
+import matplotlib.pyplot as plt
 
 class BiGraph:
     @staticmethod
@@ -140,4 +143,34 @@ class BiGraph:
             np.save(os.path.join(save_path, "negative_edges.npy"), np.array(negative_edges))
 
         return G, positive_edges, negative_edges
+    
+    @staticmethod
+    def visualize_sample_graph(G, ot_df, node_size=300):
+        disease_name = [d.split()[0] for d in ot_df['disease_name'].unique()][0]
+        disease_node = next((n for n in G.nodes if isinstance(n, str) and disease_name in n.lower()), None)
+        if disease_node:
+            remaining_nodes_sample = random.sample([n for n in G.nodes if n != disease_node], min(node_size - 1, len(G) - 1))
+            sampled_nodes = [disease_node] + remaining_nodes_sample
+        else:
+            sampled_nodes = random.sample(list(G.nodes), min(node_size, len(G)))
+        sampled_graph = G.subgraph(sampled_nodes)
+        communities = community.greedy_modularity_communities(sampled_graph)
+        colors = [0] * sampled_graph.number_of_nodes()
+        for i, comm in enumerate(communities):
+            for node in comm:
+                colors[list(sampled_graph.nodes()).index(node)] = i
+        
+        plt.figure(figsize=(20, 10))
+        pos = nx.spring_layout(sampled_graph, seed=42, k=0.7, iterations=100)
+        nx.draw_networkx(sampled_graph, 
+                        pos, with_labels=True, 
+                        node_color=colors, 
+                        cmap=plt.cm.jet, edge_color="gray", node_size=2000, arrows=True, font_size=10, font_weight="bold")
+        
+        edge_labels = nx.get_edge_attributes(sampled_graph, 'weight')
+        edge_labels = {k: f"{v:.3f}" for k, v in edge_labels.items()} 
+        nx.draw_networkx_edge_labels(sampled_graph, pos, edge_labels=edge_labels, font_color='red')
+        title = f"Sample graph with {node_size} nodes for {disease_name} disease\nOriginal graph has {len(G)} nodes"
+        plt.title(title, fontsize=12, fontweight='bold')
+        plt.show()
     
