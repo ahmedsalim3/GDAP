@@ -11,8 +11,8 @@ from src.model_evaluation import TfEvaluation, ModelEvaluation
 
 
 models = {
-    "Logistic Regression": LogisticRegression(class_weight='balanced', max_iter=500),
-    "Random Forest": RandomForestClassifier(
+    "Logistic_Regression": LogisticRegression(class_weight='balanced', max_iter=500),
+    "Random_Forest": RandomForestClassifier(
         n_estimators=50,
         max_depth=10,
         min_samples_split=10,
@@ -20,7 +20,7 @@ models = {
         class_weight='balanced',
         random_state=42
     ),
-    "Gradient Boosting": GradientBoostingClassifier(
+    "Gradient_Boosting": GradientBoostingClassifier(
         n_estimators=50,
         max_depth=3,
         learning_rate=0.1,
