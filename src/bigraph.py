@@ -145,7 +145,7 @@ class BiGraph:
         return G, positive_edges, negative_edges
     
     @staticmethod
-    def visualize_sample_graph(G, ot_df, node_size=300):
+    def visualize_sample_graph(G, ot_df, node_size=300, output_dir=None):
         disease_name = [d.split()[0] for d in ot_df['disease_name'].unique()][0]
         disease_node = next((n for n in G.nodes if isinstance(n, str) and disease_name in n.lower()), None)
         if disease_node:
@@ -172,5 +172,11 @@ class BiGraph:
         nx.draw_networkx_edge_labels(sampled_graph, pos, edge_labels=edge_labels, font_color='red')
         title = f"Sample graph with {node_size} nodes for {disease_name} disease\nOriginal graph has {len(G)} nodes"
         plt.title(title, fontsize=12, fontweight='bold')
+        if output_dir:
+            disease_name = [d.split()[0] for d in ot_df['disease_name'].unique()][0]
+            save_path = os.path.join(output_dir, disease_name, 'network')
+            output_path = os.path.join(save_path, f"{disease_name}_sample_graph_{node_size}_nodes.png")
+            plt.savefig(output_path)
+            print(f"Sample graph saved to {output_path}")
         plt.show()
     
