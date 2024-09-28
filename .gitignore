@@ -1,7 +1,8 @@
 .DS_Store
 venv
-__pycache__
+__pycache__/
 data
 assets
-.streamlit
+.idea/
+.streamlit/
 stemaway-d5a18133ff83.json
