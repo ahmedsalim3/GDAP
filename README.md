@@ -1,4 +1,4 @@
-# Machine Learning - Gene-Disease Association Prediction
+# Machine Learning - Gene-Disease Association Prediction App
 
 This project is composed of three levels:
 - Level 1: develop binary classification model focusing on only one disease (diabetes mellitus or breast cancer)
@@ -11,7 +11,7 @@ This project is composed of three levels:
 To install and run the project, you will need:
 - **Python 3.x**: Ensure you have Python 3.x installed. You can download it from [python.org](https://www.python.org/).
 - **pip**: Python package installer should be available.
-- **Dependencies**: The project requires the Python packages listed in [requirements.txt](requirements.txt).
+- **Dependencies**: The project requires the Python packages listed in [requirements.txt](./configs/requirements.txt) or [conda_requirements.txt](./configs/conda_requirements.txt).
 
 ## How to install
 
@@ -22,42 +22,55 @@ To install and run the project, you will need:
     cd BI-ML_Disease-Prediction_2024
     ```
 2. **Create a Virtual Environment** (optional but recommended):
-    ```bash
-    python -m venv venv
-    source venv/bin/activate  # On Windows use '.\venv\Scripts\activate'
-    ```
+    - On Linux/MacOS:
+        ```bash
+        python -m venv venv
+        source venv/bin/activate
+        ```
+    - On Windows:
+        ```bash
+        python -m venv venv
+        .\venv\Scripts\activate
+        ```
+
 3. **Install Dependencies:**:
     ```bash
     pip install -r requirements.txt
     ```
-
-## How to run
-
-1. Navigate to [main.py](src/main.py) Directory:
-    ```bash
-    cd src
-    ```
-2. Run the Script:
-
-    You can execute the script to visualize a composed graph with communities for any disease from the [Open Target Platform](https://platform.opentargets.org/), You will need the `EFO ID` for the disease, and optionally, a Disease Name for better visualization. The script will fetch data from the Open Target Platform and [STRING Database](https://string-db.org/) to generate PPI Composed Graphs.
-
-    To use hardcoded values, set the use `hardcoded_values` flag to True in the script. Alternatively, you can run the script with command-line arguments:
+ 4. **If you are using Conda:**
 
     ```bash
-    python main.py EFO_ID Disease_Name
+    conda create --name <env> --file conda_requirements.txt  # <env> is your environment name
     ```
-    Replace EFO_ID with the desired `EFO ID` and `Disease_Name` with the optional Disease Name if needed.
+## How to Run the Script
 
-3. Explore the Jupyter Notebook:
+1. Go to [Open Target Platform](https://platform.opentargets.org/) and obtain the disease `EFO ID`.
 
-    For a detailed research walkthrough and exploration, you can open this [research notbook](notebook/Fetching%20OpenTargets%20and%20STRING%20Database%20for%20Creating%20Gene-Protein%20Interaction%20Networks.ipynb) file. It provides an in-depth guide and visualizations to help you understand how the graph is composed and the data is processed.
+2. Update the configuration in [config.py](./src/config.py) for your experiment. If you choose BigQuery as a data source, ensure you set up your `GOOGLE_APPLICATION_CREDENTIALS` and follow the steps in [TODO](./src/open_targets/TODO.md) to obtain the necessary JSON key files.
+
+3. From the project root, run the script:
+
+    ```bash
+    python -m src.main
+    ```
+4. The results will be saved in the [results/<disease-name>](./results/) directory.
+
+## How to Run the App
+
+1. Run the following command from the project root:
+    ```sh
+    python -m streamlit run app/Home.py
+    ```
+2. Open your browser and navigate to your local or network URL:
+    - Local URL: `http://localhost:8501`
+    - Network URL: `http://192.168.45.100:8501`
 
 ## Repo's directory structure
 
 The directory structure below shows the nature of files/directories used in this repo.
 
 ```sh
-template_repo
+BI-ML_Disease-Prediction_2024
 ├── CHANGELOG.md      <- Log of changes made
 │
 ├── README.md
@@ -65,6 +78,8 @@ template_repo
 ├── .gitignore        <- Specifies intentionally untracked files to ignore by git
 │
 ├── configs           <- Dir to store config files. Conda env, requirements.txt, etc.
+│   ├── requirements.txt
+│   └── conda_requirements.txt
 │
 ├── data              <- Dir structure.
 │   ├── external      <- Data from third party sources
@@ -75,9 +90,35 @@ template_repo
 ├── docs              <- Dir to store documentation.
 │
 ├── models            <- Trained and serialized models, model predictions, or model summaries
-├── notebooks         <- Dir to store Jupyter, R Markdown notebooks, etc.
 │
-├── src               <- Dir to store source code for this project
+├── notebooks         <- Jupyter notebooks and experiments
+│   ├── main.ipynb
+│   └── network-analysis.ipynb
+│
+├── src               <- Source code for the project
+│   ├── open_targets/
+│   ├── graph_analysis/
+│   ├── config.py
+│   ├── main.py
+│   ├── edge_utils.py
+│   ├── embeddings.py
+│   ├── edge_predictions.py
+│   ├── ml_models.py
+│   ├── model_evaluation.py
+│   ├── bigraph.py
+│   └── ppi_data.py
+│ 
+└── app               <- Streamlit app
+    ├── pages/
+    ├── screenshots/
+    ├── Home.py
+    ├── functions.py
+    ├── model_parms.py
+    ├── model_training.py
+    ├── ui.py
+    ├── utils.py
+    └── visualizations.py
+
 ```
 
 ## Team Structure and Contribution
