@@ -11,7 +11,7 @@ This project is composed of three levels:
 To install and run the project, you will need:
 - **Python 3.x**: Ensure you have Python 3.x installed. You can download it from [python.org](https://www.python.org/).
 - **pip**: Python package installer should be available.
-- **Dependencies**: The project requires the Python packages listed in [configs/requirements.txt](./configs/requirements.txt) or [configs/conda_requirements.txt](./configs/conda_requirements.txt).
+- **Dependencies**: The project requires the Python packages listed in [configs/requirements.txt](./configs/requirements.txt).
 
 ## How to install
 
