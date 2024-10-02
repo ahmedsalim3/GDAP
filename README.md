@@ -11,7 +11,7 @@ This project is composed of three levels:
 To install and run the project, you will need:
 - **Python 3.x**: Ensure you have Python 3.x installed. You can download it from [python.org](https://www.python.org/).
 - **pip**: Python package installer should be available.
-- **Dependencies**: The project requires the Python packages listed in [requirements.txt](./configs/requirements.txt) or [conda_requirements.txt](./configs/conda_requirements.txt).
+- **Dependencies**: The project requires the Python packages listed in [configs/requirements.txt](./configs/requirements.txt) or [configs/conda_requirements.txt](./configs/conda_requirements.txt).
 
 ## How to install
 
@@ -21,26 +21,33 @@ To install and run the project, you will need:
     git clone https://github.com/mentorchains/BI-ML_Disease-Prediction_2024.git
     cd BI-ML_Disease-Prediction_2024
     ```
-2. **Create a Virtual Environment** (optional but recommended):
+
+2. **Checkout to `ahmed` branch**:
+    ```bash
+    git checkout ahmed
+    git pull
+    ```
+
+3. **Create a Virtual Environment** (optional but recommended):
     - On Linux/MacOS:
         ```bash
-        python -m venv venv
-        source venv/bin/activate
+        python -m venv <envname> # <envname> is your environment name
+        source <envname>/bin/activate
         ```
     - On Windows:
         ```bash
-        python -m venv venv
-        .\venv\Scripts\activate
+        python -m venv <envname> # <envname> is your environment name
+        .\<envname>\Scripts\activate
+        ```
+    - Using Conda:
+        ```bash
+        conda create --name <envname> python=3.12.2 # <envname> is your environment name
+        conda activate <envname>
         ```
 
 3. **Install Dependencies:**:
     ```bash
-    pip install -r requirements.txt
-    ```
- 4. **If you are using Conda:**
-
-    ```bash
-    conda create --name <env> --file conda_requirements.txt  # <env> is your environment name
+    pip install -r configs/requirements.txt
     ```
 ## How to Run the Script
 
