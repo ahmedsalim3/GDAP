@@ -14,7 +14,6 @@ Here, you can fetch the disease data (targets) from the open target platform usi
 @page_intro(page1_content)  
 def run():
 
-    # Sidebar for data configuration
     col1, col2, col3 = st.columns([5,5, 2], gap='small', vertical_alignment='top')
     with col1:
         st.header("Disease Data")
@@ -30,7 +29,6 @@ def run():
     col1, col2 = st.columns([10, 2])
 
     with col1:
-        # Call the display data function to show the data
         display_fetched_data()
 
         if (
@@ -45,4 +43,6 @@ def run():
 
 
 # if __name__ == "__main__":
+#     run()
+
 run()
