@@ -4,6 +4,6 @@ __pycache__/
 data
 assets
 .idea/
-.streamlit/
-stemaway-d5a18133ff83.json
+secrets.toml
+*.json
 results/
