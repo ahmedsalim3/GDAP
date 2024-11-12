@@ -1,21 +1,21 @@
 import unittest
 from unittest.mock import patch, MagicMock
 import pandas as pd
-from src.open_targets import bigquery_fetcher
+from src.dataset.open_targets import BigQueryClient, save_to_db, load_from_db
 
 
 class TestBigqueryFetcher(unittest.TestCase):
 
-    @patch('src.open_targets.bigquery_fetcher.BigQueryClient.init_bq_client')
+    @patch('src.dataset.open_targets.bigquery_client.BigQueryClient.init_bq_client')
     def test_init_bq_client(self, mock_bq_client):
         mock_client = MagicMock()
         mock_bq_client.from_service_account_json.return_value = mock_client
-        bigquery = bigquery_fetcher.BigQueryClient()
+        bigquery = BigQueryClient()
         self.assertIsNotNone(bigquery.client)
 
-    @patch('src.open_targets.bigquery_fetcher.BigQueryClient.execute_query')
-    def test_exeecute_query(self, mock_run_query):
-        bigquery = bigquery_fetcher.BigQueryClient()
+    @patch('src.dataset.open_targets.bigquery_client.BigQueryClient.execute_query')
+    def test_execute_query(self, mock_run_query):
+        bigquery = BigQueryClient()
         mock_run_query.return_value = pd.DataFrame({'col1': [1, 2], 'col2': [3, 4]})
         params = {'disease_id': 'EFO_0000319'}
         df = bigquery.execute_query('SELECT * FROM test_table WHERE diseaseId = "{disease_id}"', params)
@@ -30,7 +30,7 @@ class TestSQLiteDB(unittest.TestCase):
         mock_conn = MagicMock()
         connect.return_value.__enter__.return_value = mock_conn
         df = pd.DataFrame({'col1': [1, 2], 'col2': [3, 4]})
-        bigquery_fetcher.save_to_db(df, 'test_db.db', 'test_table')
+        save_to_db(df, 'test_db.db', 'test_table')
         to_sql.assert_called_once_with('test_table', mock_conn, if_exists='replace', index=False)
 
     @patch('sqlite3.connect')
@@ -43,11 +43,10 @@ class TestSQLiteDB(unittest.TestCase):
         mock_df = pd.DataFrame({'col1': [1], 'col2': [2]})
         read_sql.return_value = mock_df
         # Call the load_from_db function
-        df = bigquery_fetcher.load_from_db('test_db.db', 'test_table')
+        df = load_from_db('test_db.db', 'test_table')
         # Assert that read_sql was called correctly and DataFrame is returned
         read_sql.assert_called_once_with("SELECT * FROM test_table", mock_conn)
         self.assertTrue(df.equals(mock_df))
 
 if __name__ == '__main__':
     unittest.main()
-
