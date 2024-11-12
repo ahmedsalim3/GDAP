@@ -17,7 +17,7 @@ from src import (
     ProNE,
     GGVec,
     EmbeddingGenerator,
-    models,
+    sklearn_models,
     train_model,
     validate_model,
     ModelEvaluation,
@@ -207,7 +207,7 @@ elif EMBEDDING_MODE != "simple_node_embedding" and SPLIT_EDGES:
 
 # OPTION 1: Fit a classifier model based on selected MODEL_NAME from config.py file
 model, cv_scores = train_model(
-    models[MODEL_NAME], X_train, y_train, model_name=MODEL_NAME
+    sklearn_models[MODEL_NAME], X_train, y_train, model_name=MODEL_NAME
 )
 test_results, val_results = validate_model(
     model, X_test, y_test, X_val, y_val, threshold=0.5

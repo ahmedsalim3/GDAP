@@ -31,10 +31,7 @@ from .edges import (
 #   EDGES PREDICTIONS   #
 #########################
 
-from .edges import (
-    predict,
-    prediction_results
-)
+from .edges import predict, prediction_results
 
 ##################
 #   EMPEDDINGS   #
@@ -47,12 +44,7 @@ from .embeddings import EmbeddingGenerator
 #############
 #   MODELS  #
 #############
-from .models import (
-    models,
-    train_model,
-    train_tf_model,
-    validate_model
-)
+from .models import sklearn_models, train_model, train_tf_model, validate_model
 
 from .models import ModelEvaluation
 
@@ -93,7 +85,7 @@ __all__ = [
     "EmbeddingGenerator",
     
     # Models
-    "models",
+    "sklearn_models",
     "train_model",
     "train_tf_model",
     "validate_model",

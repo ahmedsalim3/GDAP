@@ -1,6 +1,3 @@
-from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
-from sklearn.linear_model import LogisticRegression
-from sklearn.svm import SVC
 from sklearn.metrics import (
     accuracy_score,
     precision_score,
@@ -10,65 +7,6 @@ from sklearn.metrics import (
     average_precision_score,
 )
 from sklearn.model_selection import cross_val_score
-
-import tensorflow as tf
-from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import Dense, Dropout
-
-
-models = {
-    "Logistic_Regression": LogisticRegression(class_weight="balanced", max_iter=1000),
-    "Random_Forest": RandomForestClassifier(
-        n_estimators=50,
-        max_depth=10,
-        min_samples_split=10,
-        min_samples_leaf=5,
-        class_weight="balanced",
-        random_state=42,
-    ),
-    "Gradient_Boosting": GradientBoostingClassifier(
-        n_estimators=50, max_depth=3, learning_rate=0.1, random_state=42
-    ),
-    "SVM": SVC(
-        kernel="linear",
-        C=0.5,
-        class_weight="balanced",
-        random_state=42,
-        probability=True,
-    ),
-}
-
-
-def train_tf_model(X_train, y_train, X_test, y_test, X_val, y_val, epochs=60):
-    X_train = tf.constant(X_train)
-    y_train = tf.constant(y_train)
-    X_test = tf.constant(X_test)
-    y_test = tf.constant(y_test)
-    X_val = tf.constant(X_val)
-    y_val = tf.constant(y_val)
-
-    model = Sequential(
-        [
-            Dense(64, activation="relu"),
-            Dropout(0.3),
-            Dense(128, activation="relu"),
-            Dropout(0.3),
-            Dense(64, activation="relu"),
-            Dense(1, activation="sigmoid"),
-        ]
-    )
-
-    model.compile(loss="binary_crossentropy", optimizer="adam", metrics=["accuracy"])
-
-    print("Training sequential API model...")
-    history = model.fit(
-        X_train, y_train, epochs=epochs, validation_data=(X_test, y_test), verbose=0
-    )
-
-    loss, acc = model.evaluate(X_test, y_test)
-    print(f"Test Accuracy: {acc:.4f}, Test Loss: {loss:.4f}")
-
-    return model, history, acc, loss
 
 
 def parallel_cross_val(model, X_train, y_train, cv=5):
