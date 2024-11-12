@@ -50,18 +50,14 @@ class BigQueryClient:
         The environment variable should be set to the path of your service account JSON key.
         For details on how to set up your credentials, refer to the TODO.md file.
         """
+        
+        credentials_path = credentials_path or os.getenv("GOOGLE_APPLICATION_CREDENTIALS")
         if credentials_path:
             client = bigquery.Client.from_service_account_json(credentials_path)
         elif "GOOGLE_APPLICATION_CREDENTIALS" in os.environ:
             client = bigquery.Client()
         else:
-            from dotenv import load_dotenv
-            load_dotenv()
-            credentials_path = os.getenv("GOOGLE_APPLICATION_CREDENTIALS")
-            if credentials_path:
-                client = bigquery.Client.from_service_account_json(credentials_path)
-            else:
-                raise ValueError("The environment variable GOOGLE_APPLICATION_CREDENTIALS is not set.")
+            raise ValueError("The environment variable GOOGLE_APPLICATION_CREDENTIALS is not set.")
 
         return client
 
