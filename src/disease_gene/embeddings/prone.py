@@ -5,7 +5,7 @@ ProNE: https://github.com/VHRanger/nodevectors/blob/master/nodevectors/prone.py
 - Added new method to save node vectors in Word2Vec format
 """
 
-from src.embeddings.embedders import BaseNodeEmbedder
+from .embedders import BaseNodeEmbedder
 import numpy as np
 import scipy
 from scipy import sparse, linalg

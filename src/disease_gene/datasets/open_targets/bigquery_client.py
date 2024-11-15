@@ -19,7 +19,6 @@ NOTE: alternatively, you can use these SQL queries in BigQuery console for your 
 from google.cloud import bigquery
 import os
 from google.oauth2 import service_account
-import streamlit as st
 
 
 class BigQueryClient:
@@ -63,6 +62,7 @@ class BigQueryClient:
 
     def init_bq_client_deploy(self):
         """Initializes a BigQuery client using credentials from Streamlit secrets for deployment."""
+        import streamlit as st
         credentials = service_account.Credentials.from_service_account_info(
             st.secrets["gcp_service_account"]
         )

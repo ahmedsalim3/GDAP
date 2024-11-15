@@ -5,7 +5,7 @@ Node2Vec: https://github.com/VHRanger/nodevectors/blob/master/nodevectors/node2v
 - Replaced pandas with a direct approach using list comprehension and G.names
 """
 
-from src.embeddings.embedders import BaseNodeEmbedder
+from .embedders import BaseNodeEmbedder
 import numba
 import numpy as np
 import pandas as pd

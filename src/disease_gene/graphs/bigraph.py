@@ -27,7 +27,7 @@ class BiGraph:
         -----------
         ot_df :
             OpenTargets data containing disease-gene associations.
-            NOTE: This sohould be fetched from either bigquery_fetcher or bigquery_fetcher classes
+            NOTE: This sohould be fetched from either GraphQLClient or BigQueryClient classes
             Should have columns: ['disease_name', 'symbol'] and ['globalScore'/'direct_score'/'indirect_score']
 
         ppi_df : pandas.DataFrame

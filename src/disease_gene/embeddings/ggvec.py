@@ -5,7 +5,7 @@ ProNE: https://github.com/VHRanger/nodevectors/blob/master/nodevectors/ggvec.py
 - Added new method to save node vectors in Word2Vec format
 """
 
-from src.embeddings.embedders import BaseNodeEmbedder
+from .embedders import BaseNodeEmbedder
 import csrgraph as cg
 from gensim.models import KeyedVectors
 
