@@ -26,6 +26,8 @@ setup(
         "google-cloud-bigquery==3.25.0",
         "db-dtypes==1.3.0",
         "st-pages==1.0.1",
+        "stqdm==0.0.5",
+        "pyvis==0.3.2"
     ],
     include_package_data=True, 
 )
