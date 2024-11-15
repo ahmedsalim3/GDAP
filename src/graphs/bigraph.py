@@ -17,6 +17,7 @@ class BiGraph:
         top_positive_percentage=None,
         negative_to_positive_ratio=10,
         output_dir=None,
+        streamlit=False,
     ):
         """
         Creates a bipartite networkx graph based on disease-gene associations (from OpenTargets)
@@ -62,6 +63,11 @@ class BiGraph:
         negative_edges : list
             A list of negative edges (non-associated genes) generated to balance the positive edges
         """
+        if streamlit:
+            from stqdm import stqdm
+            _PROGRESS_BAR = stqdm
+        else:
+            _PROGRESS_BAR = tqdm     
 
         # Prepare OpenTargets data
         if "globalScore" in ot_df.columns:
@@ -100,7 +106,7 @@ class BiGraph:
 
         # Add PPI edges
         ppi_edges_added = 0
-        for _, row in tqdm(
+        for _, row in _PROGRESS_BAR(
             ppi_df.iterrows(), total=len(ppi_df), desc="Adding PPI edges"
         ):
             if row["GeneName1"] != row["GeneName2"]:
@@ -130,7 +136,7 @@ class BiGraph:
         all_genes = set(ppi_df["GeneName1"]).union(set(ppi_df["GeneName2"]))
         negative_edges = []
 
-        for disease in diseases:
+        for disease in _PROGRESS_BAR(diseases, desc="Generating Negative Edges", total=len(diseases)):
             associated_genes = set(G.neighbors(disease))
             non_associated_genes = all_genes - associated_genes
 
