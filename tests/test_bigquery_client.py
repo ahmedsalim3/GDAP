@@ -1,19 +1,19 @@
 import unittest
 from unittest.mock import patch, MagicMock
 import pandas as pd
-from src.dataset.open_targets import BigQueryClient, save_to_db, load_from_db
+from disease_gene.datasets.open_targets import BigQueryClient, save_to_db, load_from_db
 
 
 class TestBigqueryFetcher(unittest.TestCase):
 
-    @patch('src.dataset.open_targets.bigquery_client.BigQueryClient.init_bq_client')
+    @patch('disease_gene.datasets.open_targets.bigquery_client.BigQueryClient.init_bq_client')
     def test_init_bq_client(self, mock_bq_client):
         mock_client = MagicMock()
         mock_bq_client.from_service_account_json.return_value = mock_client
         bigquery = BigQueryClient()
         self.assertIsNotNone(bigquery.client)
 
-    @patch('src.dataset.open_targets.bigquery_client.BigQueryClient.execute_query')
+    @patch('disease_gene.datasets.open_targets.bigquery_client.BigQueryClient.execute_query')
     def test_execute_query(self, mock_run_query):
         bigquery = BigQueryClient()
         mock_run_query.return_value = pd.DataFrame({'col1': [1, 2], 'col2': [3, 4]})
