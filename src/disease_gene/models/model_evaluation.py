@@ -11,6 +11,7 @@ import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
 import numpy as np
 import pandas as pd
+import os
 
 
 class ModelEvaluation:
@@ -34,6 +35,7 @@ class ModelEvaluation:
 
         history: History logs for TensorFlow model.
         history_figsize: Size of the figure for plotting training history (default is (14, 5)).
+        output_dir: Optional directory to save the visualizations.
     """
 
     def __init__(
@@ -47,6 +49,7 @@ class ModelEvaluation:
         is_tf_model=False,
         history=None,
         history_figsize=(14, 5),
+        output_dir=None,
     ):
         self.model = model
         self.X_test = X_test
@@ -56,6 +59,7 @@ class ModelEvaluation:
         self.threshold = threshold
         self.figsize = figsize
         self.history_figsize = history_figsize
+        self.output_dir = output_dir
 
         if is_tf_model:
             self.y_pred_proba = self.model.predict(self.X_test).flatten()
@@ -261,7 +265,14 @@ class ModelEvaluation:
         ax4.legend(loc="upper right", fontsize=fontsize)
 
         plt.tight_layout()
-        plt.show()
+
+        if self.output_dir:
+            os.makedirs(self.output_dir, exist_ok=True)
+            save_path = os.path.join(self.output_dir, f"{self.model_name if self.model_name is not None else 'model'}_evaluation.png")
+            plt.savefig(save_path)
+            print(f"Evaluation plot saved to {save_path}")
+        else:
+            plt.show()
 
     def plot_history(self):
         if self.history is None:
@@ -294,4 +305,10 @@ class ModelEvaluation:
         axes[1].legend()
 
         plt.tight_layout()
-        plt.show()
+        if self.output_dir:
+            os.makedirs(self.output_dir, exist_ok=True)
+            save_path = os.path.join(self.output_dir, f"training_history.png")
+            plt.savefig(save_path)
+            print(f"Evaluation plot saved to {save_path}")
+        else:
+            plt.show()
