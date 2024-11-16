@@ -1,290 +1,157 @@
-# Import configuration
-from src.config import *
-
-from src import (
-    PPIData,
-    BigQueryClient,
-    GraphQLClient,
-    BiGraph,
-    map_nodes,
-    features_labels,
-    features_labels_edges,
-    features_labels_edges_idx,
-    features_labels_idx,
-    split_data,
-    split_edge_data,
-    Node2Vec,
-    ProNE,
-    GGVec,
-    EmbeddingGenerator,
-    sklearn_models,
-    train_model,
-    validate_model,
-    ModelEvaluation,
-    predict,
-    prediction_results,
-)
-from src import DIRECT_SCORES, INDIRECT_SCORES
-import joblib
 import os
-
+from config import Config
 # ==========================
-# DATA PROCESSING
+#       MAIN CLASS
 # ==========================
+class DiseaseGene:
+    def __init__(self, config: Config):
+        self.config = config
+        self.disease_name = None
+        self.G = None
+        self.pos_edges = None
+        self.neg_edges = None
+        self.embeddings = None
+        self.node_to_index = None
+        self.model = None
 
-# 1. Load and process PPI data
-ppi_data = PPIData(max_ppi_interactions=MAX_PPI_INTERACTIONS)
-ppi_df = ppi_data.process_ppi_data()
-ppi_df.head()
+    def load_data(self):
+        """Load and process datasets (PPI and disease) based on configuration."""
+        from disease_gene.datasets.open_targets import BigQueryClient, GraphQLClient, DIRECT_SCORES, INDIRECT_SCORES
+        from disease_gene.datasets.string_database import PPIData
 
-# 2. Fetch data based on the selected data source
-if DATA_SOURCE == "GraphQL_global_scores":
-    # Fetch global scores using GraphQL - NOTE: This score is approximately equal to the indirect scores from BigQuery
-    graphql_client = GraphQLClient()
-    ot_df = graphql_client.fetch_full_data(DISEASE_ID)
-    print(f"Final disease data shape: {ot_df.shape}")
+        # Load PPI data
+        ppi_data = PPIData(max_ppi_interactions=self.config.PPI_INTERACTIONS)
+        ppi_df = ppi_data.process_ppi_data()
 
-elif DATA_SOURCE == "BigQuery_direct_scores":
-    # Fetch direct scores from BigQuery
-    bq_client = BigQueryClient()
-    ot_df = bq_client.execute_query(DIRECT_SCORES, PARAMS)
-    print(f"Final disease data shape: {ot_df.shape}")
+        # Load disease data based on data source
+        if self.config.DATA_SOURCE == "GraphQLClient":
+            graphql_client = GraphQLClient()
+            ot_df = graphql_client.fetch_full_data(self.config.DISEASE_ID)
+        elif self.config.DATA_SOURCE == "BigQueryClient":
+            bq_client = BigQueryClient()
 
-elif DATA_SOURCE == "BigQuery_indirect_scores":
-    # Fetch indirect scores from BigQuery
-    bq_client = BigQueryClient()
-    ot_df = bq_client.execute_query(INDIRECT_SCORES, PARAMS)
-    print(f"Final disease data shape: {ot_df.shape}")
+            query = self.config.QUERY  # Should be set to either DIRECT_SCORES or INDIRECT_SCORES
+            if query not in [DIRECT_SCORES, INDIRECT_SCORES]:
+                raise ValueError(f"Invalid query selected: {query}. It must be either DIRECT_SCORES or INDIRECT_SCORES.")
+            params = {"disease_id": self.config.DISEASE_ID}
+            ot_df = bq_client.execute_query(query, params)
 
-ot_df.head()
+        self.disease_name = ot_df.disease_name.iloc[0].split()[0]
+        return ppi_df, ot_df
 
-# ==========================
-# GRAPH CREATION
-# ==========================
+    def create_graph(self, ppi_df, ot_df):
+        """Create graph using PPI data and open-targets data."""
+        from disease_gene.graphs import BiGraph
+        G, pos_edges, neg_edges = BiGraph.create_graph(
+            ot_df, ppi_df, negative_to_positive_ratio=self.config.NEGATIVE_TO_POSITIVE_RATIO, output_dir=self.config.OUTPUT_DIR)
+        BiGraph.visualize_sample_graph(G, ot_df, node_size=300, output_dir=self.config.OUTPUT_DIR)
+        self.G, self.pos_edges, self.neg_edges = G, pos_edges, neg_edges
 
-# Create a bipartite graph using the fetched disease data and PPI
-G, positive_edges, negative_edges = BiGraph.create_graph(
-    ot_df,
-    ppi_df,
-    negative_to_positive_ratio=NEGATIVE_TO_POSITIVE_RATIO,
-    output_dir=OUTPUT_DIR,
-)
+    def generate_embeddings(self):
+        """Generate node embeddings for the graph."""
+        from disease_gene.embeddings import Node2Vec, ProNE, GGVec, EmbeddingGenerator
 
-# Visualize a sample of the created graph
-BiGraph.visualize_sample_graph(G, ot_df, node_size=300, output_dir=OUTPUT_DIR)
+        save_path = os.path.join(self.config.OUTPUT_DIR, self.disease_name, "embedding_wheel/")
+        os.makedirs(save_path, exist_ok=True)
 
-# ==========================
-# EMBEDDINGS
-# ==========================
+        if self.config.EMBEDDING_MODE == "degree_avg":
+            self.embeddings = EmbeddingGenerator.simple_node_embedding(self.G, dim=64)
+        elif self.config.EMBEDDING_MODE == "Node2Vec":
+            model = Node2Vec(n_components=32, walklen=10, verbose=False)
+            self.embeddings = model.fit_transform(self.G)
+            model.save(os.path.join(save_path, "n2v_model"))
+            model.save_vectors(os.path.join(save_path, "n2v_wheel_model.bin"))
+        elif self.config.EMBEDDING_MODE == "ProNE":
+            model = ProNE(n_components=32, step=5, mu=0.2, theta=0.5, exponent=0.75, verbose=False)
+            self.embeddings = model.fit_transform(self.G)
+            model.save(os.path.join(save_path, "prone_model"))
+            ProNE.save_vectors(model, os.path.join(save_path, "prone_wheel_model.bin"))
+        elif self.config.EMBEDDING_MODE == "GGVec":
+            model = GGVec(n_components=64, order=3, verbose=False)
+            self.embeddings = model.fit_transform(self.G)
+            model.save(os.path.join(save_path, "ggvec_model"))
+            GGVec.save_vectors(model, os.path.join(save_path, "ggvec_wheel_model.bin"))
 
-if EMBEDDING_MODE == "simple_node_embedding":
-    # Generate simple node embeddings
-    embeddings = EmbeddingGenerator.simple_node_embedding(G, dim=64)
-    disease_name = [d.split()[0] for d in ot_df["disease_name"].unique()][0]
-    print(f"\nEmbeddings for node '{disease_name}':\n{embeddings[str(disease_name)]}\n")
+    def extract_features_labels(self, test_size):
+        """Extract features, labels, and split data."""
+        from disease_gene.edges.edge_utils import features_labels_edges_idx, features_labels_edges, split_edge_data
 
-elif EMBEDDING_MODE == "Node2Vec":
-    # Train Node2Vec model on graph
-    n2v_model = Node2Vec(n_components=32, walklen=10)
-    print("Training Node2Vec model...")
-    embeddings = n2v_model.fit_transform(G)
-    node_to_index = map_nodes(G)
+        # Map nodes to index for embeddings
+        from disease_gene.edges.edge_utils import map_nodes
+        self.node_to_index = map_nodes(self.G)
 
-    disease_name = [d.split()[0] for d in ot_df["disease_name"].unique()][0]
-    index = node_to_index[disease_name]
-    print(f"\nEmbeddings for node '{disease_name}':\n{embeddings[index]}")
+        if self.config.EMBEDDING_MODE == "degree_avg":
+            X, y, edges = features_labels_edges(self.pos_edges, self.neg_edges, self.embeddings)
+        else:
+            X, y, edges = features_labels_edges_idx(self.pos_edges, self.neg_edges, self.embeddings, self.node_to_index)
 
-    # Save Node2Vec model and vectors
-    save_path = os.path.join(OUTPUT_DIR, disease_name, "embedding_wheel/")
-    os.makedirs(save_path, exist_ok=True)
-    n2v_model.save(os.path.join(save_path, "n2v_model"))
-    n2v_model.save_vectors(os.path.join(save_path, "n2v_wheel_model.bin"))
+        return split_edge_data(X, y, edges, test_size)
 
-elif EMBEDDING_MODE == "ProNE":
-    # Train ProNE model on graph
-    prone_model = ProNE(
-        n_components=32, step=5, mu=0.2, theta=0.5, exponent=0.75, verbose=True
-    )
-    print("Training ProNE model...")
-    embeddings = prone_model.fit_transform(G)
-    node_to_index = map_nodes(G)
+    def train_and_evaluate_model(self, X_train, y_train, X_test, y_test, X_val, y_val):
+        """Train and evaluate classification model."""
+        from disease_gene.models import sklearn_models, train_model, validate_model
+        import joblib
 
-    disease_name = [d.split()[0] for d in ot_df["disease_name"].unique()][0]
-    index = node_to_index[disease_name]
-    print(f"Embeddings for node '{disease_name}':\n{embeddings[index]}")
+        model, _ = train_model(sklearn_models[self.config.MODEL_NAME], X_train, y_train, model_name=self.config.MODEL_NAME)
+        test_results, val_results = validate_model(model, X_test, y_test, X_val, y_val, threshold=0.5)
 
-    # Save ProNE model and vectors
-    save_path = os.path.join(OUTPUT_DIR, disease_name, "embedding_wheel/")
-    os.makedirs(save_path, exist_ok=True)
-    prone_model.save(os.path.join(save_path, "prone_model"))
-    ProNE.save_vectors(prone_model, os.path.join(save_path, "prone_wheel_model.bin"))
-    print(f"Vectors/model saved to {save_path}")
+        print(f"\n{self.config.MODEL_NAME} (Test Set):")
+        for metric, value in test_results.items():
+            print(f"{metric}: {value:.4f}")
 
-elif EMBEDDING_MODE == "GGVec":
-    # Train GGVec model on graph
-    ggvec_model = GGVec(n_components=64, order=3, verbose=True)
-    print("Training GGVec model...")
-    embeddings = ggvec_model.fit_transform(G)
-    node_to_index = map_nodes(G)
+        print(f"\n{self.config.MODEL_NAME} (Validation Set):")
+        for metric, value in val_results.items():
+            print(f"{metric}: {value:.4f}")
 
-    disease_name = [d.split()[0] for d in ot_df["disease_name"].unique()][0]
-    index = node_to_index[disease_name]
-    print(f"Embeddings for node '{disease_name}':\n{embeddings[index]}")
+        # Save model
+        models_path = os.path.join(self.config.OUTPUT_DIR, self.disease_name, "classifier_models/")
+        os.makedirs(models_path, exist_ok=True)
+        joblib.dump(model, os.path.join(models_path, f"{self.config.MODEL_NAME}.pkl"))
 
-    # Save GGVec model and vectors
-    save_path = os.path.join(OUTPUT_DIR, disease_name, "embedding_wheel/")
-    os.makedirs(save_path, exist_ok=True)
-    ggvec_model.save(os.path.join(save_path, "ggvec_model"))
-    GGVec.save_vectors(ggvec_model, os.path.join(save_path, "ggvec_wheel_model.bin"))
-    print(f"Vectors/model saved to {save_path}")
+        return model, models_path
 
-# ==========================------
-# FEATURE EXTRACTION AND LABELING
-# ==========================------
+    def plot_model_evaluation(self, model, X_val, y_val, models_path):
+        """Plot model evaluation results."""
+        from disease_gene.models import ModelEvaluation
+        Evaluation = ModelEvaluation(model, X_val, y_val, threshold=0.5, model_name=self.config.MODEL_NAME, figsize=(14, 12), output_dir=models_path)
+        Evaluation.plot_evaluation()
 
-# Extract features and labels from edges and embeddings
-if EMBEDDING_MODE == "simple_node_embedding" and not SPLIT_EDGES:
-    # Option 1: Directly get feature labels from edges and embeddings (using simple node embedding function)
-    X, y = features_labels(positive_edges, negative_edges, embeddings)
-    print(f"Sample from X: {X[0:1]}")
-    print(f"Sample from y: {y[0:1]}")
-    X_train, y_train, X_val, y_val, X_test, y_test = split_data(
-        X, y, test_size=TEST_SIZE
-    )
-
-elif EMBEDDING_MODE == "simple_node_embedding" and SPLIT_EDGES:
-    # Option 2: Split edges for prediction, and get features/labels from split edges (using simple node embedding function)
-    X, y, edges = features_labels_edges(
-        positive_edges, negative_edges, embeddings, scale_features=False
-    )
-    print(f"Sample from X: {X[0:1]}")
-    print(f"Sample from y: {y[0:1]}")
-    (
-        X_train,
-        y_train,
-        X_val,
-        y_val,
-        X_test,
-        y_test,
-        edges_train,
-        edges_val,
-        edges_test,
-    ) = split_edge_data(X, y, edges, test_size=TEST_SIZE)
-
-elif EMBEDDING_MODE != "simple_node_embedding" and not SPLIT_EDGES:
-    # Option 1: Get feature labels using node indexes for advanced embeddings algo (Node2Vec, ProNE, etc.)
-    X, y = features_labels_idx(
-        positive_edges, negative_edges, embeddings, node_to_index
-    )
-    print(f"Sample from X: {X[0:1]}")
-    print(f"Sample from y: {y[0:1]}")
-    X_train, y_train, X_val, y_val, X_test, y_test = split_data(
-        X, y, test_size=TEST_SIZE
-    )
-
-elif EMBEDDING_MODE != "simple_node_embedding" and SPLIT_EDGES:
-    # Option 2: Get feature labels from split edges using node indexes for advanced embeddings algo (Node2Vec, ProNE, etc.)
-    X, y, edges = features_labels_edges_idx(
-        positive_edges, negative_edges, embeddings, node_to_index, scale_features=False
-    )
-    print(f"Sample from X: {X[0:1]}")
-    print(f"Sample from y: {y[0:1]}")
-    (
-        X_train,
-        y_train,
-        X_val,
-        y_val,
-        X_test,
-        y_test,
-        edges_train,
-        edges_val,
-        edges_test,
-    ) = split_edge_data(X, y, edges, test_size=TEST_SIZE)
-
-# ==========================------
-# MODEL SELECTION AND PREDICTIONS
-# ==========================------
-
-# OPTION 1: Fit a classifier model based on selected MODEL_NAME from config.py file
-model, cv_scores = train_model(
-    sklearn_models[MODEL_NAME], X_train, y_train, model_name=MODEL_NAME
-)
-test_results, val_results = validate_model(
-    model, X_test, y_test, X_val, y_val, threshold=0.5
-)
-
-# Print results
-print(f"\n{MODEL_NAME} (Test Set)")
-for metric, value in test_results.items():
-    print(f"{metric}: {value:.4f}")
-
-print(f"\n{MODEL_NAME} (Validation Set):")
-for metric, value in val_results.items():
-    print(f"{metric}: {value:.4f}")
-
-# Save Model
-models_path = os.path.join(OUTPUT_DIR, disease_name, "classifier_models/")
-os.makedirs(models_path, exist_ok=True)
-joblib.dump(model, os.path.join(models_path, f"{MODEL_NAME}.pkl"))
-
-# # OPTION 2: Define your own model and train it
-# model = GradientBoostingClassifier(n_estimators=50, max_depth=3, learning_rate=0.1, random_state=42)
-# model_name = "Gradient Boosting" # Optional name
-# model, cv_scores= train_model(model, X_train, y_train, model_name=model_name)
-# test_results, val_results = validate_model(model, X_test, y_test, X_val, y_val, threshold=0.5)
-
-# # OPTION 3: Example of simple dense model using sequential api
-# from src import train_tf_model
-# model, history, acc, loss = train_tf_model(X_train, y_train, X_test, y_test, X_val, y_val, epochs=70)
-# test_results, val_results = validate_model(model, X_test, y_test, X_val, y_val, threshold=0.5, is_tf_model=True)
-# model_name="Sequential Model"
-
-# ==========================
-# PLOT VALIDATION RESULTS
-# ==========================
-
-Evaluation = ModelEvaluation(
-    model, X_val, y_val, threshold=0.5, model_name=MODEL_NAME, figsize=(14, 12)
-)
-Evaluation.plot_evaluation()
-
-# # NOTE: In case of Tensorflow model, use this:
-# Evaluation = ModelEvaluation(model, X_val, y_val, threshold=0.5, model_name="Sequential Model", figsize=(14,12),
-#                              is_tf_model=True, history=history, history_figsize=(14, 5))
-# Evaluation.plot_history()
-# Evaluation.plot_evaluation()
+    def predict_and_save_results(self, model, X_val, edges_val, models_path, threshold=0.5):
+        """Make predictions and save results."""
+        from disease_gene.edges.edge_predictions import predict, prediction_results
+        associated_proteins, non_associated_proteins = predict(model, X_val, edges_val, threshold=threshold)
+        associated_df, non_associated_df = prediction_results(associated_proteins, non_associated_proteins, output_dir=self.config.OUTPUT_DIR)
+        return associated_df, non_associated_df
 
 
 # ==========================
-# PREDICTION RESULTS
-# ==========================
+#       MAIN EXECUTION
+# # ==========================
+if __name__ == "__main__":
+    
+    # initialize the config
+    config = Config()
 
-if SPLIT_EDGES:
-    associated_proteins, non_associated_proteins = predict(
-        model, X_val, edges_val, threshold=0.5
-    )
+    # pipeline instance
+    pipeline = DiseaseGene(config)
 
-    # Print results for associated proteins
-    print("\nAssociated Proteins:")
-    for i, (edge, (pred, confidence)) in enumerate(associated_proteins.items()):
-        if i < 5:
-            disease, protein = edge
-            print(
-                f"Protein: {protein} (Disease: {disease}), Prediction: {pred}, Confidence Score: {confidence:.4f}"
-            )
+    # load datasets
+    ppi_df, ot_df = pipeline.load_data()
 
-    # Print results for non-associated proteins
-    print("\nNon-Associated Proteins:")
-    for j, (edge, (pred, confidence)) in enumerate(non_associated_proteins.items()):
-        if j < 5:
-            disease, protein = edge
-            print(
-                f"Protein: {protein} (Disease: {disease}), Prediction: {pred}, Confidence Score: {confidence:.4f}"
-            )
+    # create graph
+    pipeline.create_graph(ppi_df, ot_df)
 
-    associated_df, non_associated_df = prediction_results(
-        associated_proteins, non_associated_proteins, output_dir=OUTPUT_DIR
-    )
-    print(
-        f"Proteins associated/non-associated to {disease_name} are saved to {OUTPUT_DIR}"
-    )
+    # generate embeddings
+    pipeline.generate_embeddings()
+
+    # extract features and labels
+    X_train, y_train, X_val, y_val, X_test, y_test, edges_train, edges_val, edges_test = pipeline.extract_features_labels(config.TEST_SIZE)
+
+    # train and evaluate model
+    model, models_path = pipeline.train_and_evaluate_model(X_train, y_train, X_test, y_test, X_val, y_val)
+
+    # plot evaluation results
+    pipeline.plot_model_evaluation(model, X_val, y_val, models_path)
+
+    # make predictions and save results
+    associated_df, non_associated_df = pipeline.predict_and_save_results(model, X_val, edges_val, models_path)
