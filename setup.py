@@ -1,10 +1,10 @@
 from setuptools import setup, find_packages
 
 setup(
-    name='bi_ml_stemaway',
+    name='bi-ml-stemaway',
     version='0.1',
-    packages=find_packages(include=['src', 'app']),
-    package_dir={'': '.'},
+    packages=find_packages(where='src', include=['gene_disease', 'gene_disease.*']),
+    package_dir={'': 'src'},
     install_requires=[
         "csrgraph==0.1.28",
         "gensim==4.3.3",
@@ -29,5 +29,5 @@ setup(
         "stqdm==0.0.5",
         "pyvis==0.3.2"
     ],
-    include_package_data=True, 
+    include_package_data=True,
 )

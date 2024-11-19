@@ -1,11 +1,9 @@
 from pathlib import Path
-from dotenv import load_dotenv
-import os
-from disease_gene.datasets.open_targets import DIRECT_SCORES, INDIRECT_SCORES
+from gene_disease.datasets.open_targets import DIRECT_SCORES, INDIRECT_SCORES
 
-load_dotenv()
 
 PROJ_ROOT = Path(__file__).resolve().parents[1]
+
 
 # ==========================
 #       CONFIGURATION
@@ -19,5 +17,5 @@ class Config:
     EMBEDDING_MODE = "GGVec"  # Options: 'Node2Vec', 'ProNE', 'GGVec', 'degree_avg'
     MODEL_NAME = "Logistic_Regression"  # Options: 'Random_Forest', 'Gradient_Boosting', 'SVM', 'Logistic_Regression'
     TEST_SIZE = 0.2  # Train/Test split ratio
-    OUTPUT_DIR = PROJ_ROOT / "results/"  # Output folder path
-    CREDENTIALS = os.getenv("GOOGLE_APPLICATION_CREDENTIALS")  # From .env
+    OUTPUT_DIR = PROJ_ROOT / "wohow/"  # Output folder path
+    CREDENTIALS = PROJ_ROOT / "configs/stemaway-d5a18133ff83.json"  # Credentials path if using BigQueryClient as a data source

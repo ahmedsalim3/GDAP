@@ -1,9 +1,11 @@
 import os
 from config import Config
+
+
 # ==========================
 #       MAIN CLASS
 # ==========================
-class DiseaseGene:
+class GeneDisease:
     def __init__(self, config: Config):
         self.config = config
         self.disease_name = None
@@ -16,8 +18,8 @@ class DiseaseGene:
 
     def load_data(self):
         """Load and process datasets (PPI and disease) based on configuration."""
-        from disease_gene.datasets.open_targets import BigQueryClient, GraphQLClient, DIRECT_SCORES, INDIRECT_SCORES
-        from disease_gene.datasets.string_database import PPIData
+        from gene_disease.datasets.open_targets import BigQueryClient, GraphQLClient, DIRECT_SCORES, INDIRECT_SCORES
+        from gene_disease.datasets.string_database import PPIData
 
         # Load PPI data
         ppi_data = PPIData(max_ppi_interactions=self.config.PPI_INTERACTIONS)
@@ -28,7 +30,7 @@ class DiseaseGene:
             graphql_client = GraphQLClient()
             ot_df = graphql_client.fetch_full_data(self.config.DISEASE_ID)
         elif self.config.DATA_SOURCE == "BigQueryClient":
-            bq_client = BigQueryClient()
+            bq_client = BigQueryClient(credentials_path=self.config.CREDENTIALS)
 
             query = self.config.QUERY  # Should be set to either DIRECT_SCORES or INDIRECT_SCORES
             if query not in [DIRECT_SCORES, INDIRECT_SCORES]:
@@ -41,7 +43,7 @@ class DiseaseGene:
 
     def create_graph(self, ppi_df, ot_df):
         """Create graph using PPI data and open-targets data."""
-        from disease_gene.graphs import BiGraph
+        from gene_disease.graphs import BiGraph
         G, pos_edges, neg_edges = BiGraph.create_graph(
             ot_df, ppi_df, negative_to_positive_ratio=self.config.NEGATIVE_TO_POSITIVE_RATIO, output_dir=self.config.OUTPUT_DIR)
         BiGraph.visualize_sample_graph(G, ot_df, node_size=300, output_dir=self.config.OUTPUT_DIR)
@@ -49,7 +51,7 @@ class DiseaseGene:
 
     def generate_embeddings(self):
         """Generate node embeddings for the graph."""
-        from disease_gene.embeddings import Node2Vec, ProNE, GGVec, EmbeddingGenerator
+        from gene_disease.embeddings import Node2Vec, ProNE, GGVec, EmbeddingGenerator
 
         save_path = os.path.join(self.config.OUTPUT_DIR, self.disease_name, "embedding_wheel/")
         os.makedirs(save_path, exist_ok=True)
@@ -74,10 +76,10 @@ class DiseaseGene:
 
     def extract_features_labels(self, test_size):
         """Extract features, labels, and split data."""
-        from disease_gene.edges.edge_utils import features_labels_edges_idx, features_labels_edges, split_edge_data
+        from gene_disease.edges.edge_utils import features_labels_edges_idx, features_labels_edges, split_edge_data
 
         # Map nodes to index for embeddings
-        from disease_gene.edges.edge_utils import map_nodes
+        from gene_disease.edges.edge_utils import map_nodes
         self.node_to_index = map_nodes(self.G)
 
         if self.config.EMBEDDING_MODE == "degree_avg":
@@ -89,7 +91,8 @@ class DiseaseGene:
 
     def train_and_evaluate_model(self, X_train, y_train, X_test, y_test, X_val, y_val):
         """Train and evaluate classification model."""
-        from disease_gene.models import sklearn_models, train_model, validate_model
+        from gene_disease.models.models_dict import sklearn_models
+        from gene_disease.models.model_training import train_model, validate_model
         import joblib
 
         model, _ = train_model(sklearn_models[self.config.MODEL_NAME], X_train, y_train, model_name=self.config.MODEL_NAME)
@@ -112,13 +115,13 @@ class DiseaseGene:
 
     def plot_model_evaluation(self, model, X_val, y_val, models_path):
         """Plot model evaluation results."""
-        from disease_gene.models import ModelEvaluation
+        from gene_disease.models.model_evaluation import ModelEvaluation
         Evaluation = ModelEvaluation(model, X_val, y_val, threshold=0.5, model_name=self.config.MODEL_NAME, figsize=(14, 12), output_dir=models_path)
         Evaluation.plot_evaluation()
 
     def predict_and_save_results(self, model, X_val, edges_val, models_path, threshold=0.5):
         """Make predictions and save results."""
-        from disease_gene.edges.edge_predictions import predict, prediction_results
+        from gene_disease.edges.edge_predictions import predict, prediction_results
         associated_proteins, non_associated_proteins = predict(model, X_val, edges_val, threshold=threshold)
         associated_df, non_associated_df = prediction_results(associated_proteins, non_associated_proteins, output_dir=self.config.OUTPUT_DIR)
         return associated_df, non_associated_df
@@ -133,7 +136,7 @@ if __name__ == "__main__":
     config = Config()
 
     # pipeline instance
-    pipeline = DiseaseGene(config)
+    pipeline = GeneDisease(config)
 
     # load datasets
     ppi_df, ot_df = pipeline.load_data()

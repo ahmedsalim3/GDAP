@@ -44,7 +44,7 @@ class BigQueryClient:
         Initializes a BigQuery client using credentials from local environment or a given credentials file.
             1. `credentials_path` (if provided)
             2. Directly from the environment variable GOOGLE_APPLICATION_CREDENTIALS, which is set using export
-            1. From the .env file loaded with load_dotenv()
+            1. By providing the actual path as a string
         
         The environment variable should be set to the path of your service account JSON key.
         For details on how to set up your credentials, refer to the TODO.md file.
