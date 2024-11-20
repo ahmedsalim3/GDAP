@@ -23,9 +23,7 @@ path = "views/faqs.py"
 name = "FAQs"
 icon = ":grey_question:"
 
-
 [[pages]]
 path = "views/about.py"
 name = "About Us"
 icon = ":material/account_circle:"
-
