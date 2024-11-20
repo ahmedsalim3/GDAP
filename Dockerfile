@@ -2,16 +2,14 @@ FROM python:3.12-slim
 
 WORKDIR /app
 
-COPY configs/requirements.txt .
+COPY src/ /app/src/
+COPY setup.py .
 
 RUN pip install -U pip
-
-RUN pip install --no-cache-dir -r requirements.txt 
+RUN pip install --no-cache-dir .
 
 COPY . .
 
-EXPOSE 8501  
+EXPOSE 8501
 
-ENV PYTHONPATH="/app:/src:/mount/src:/mount/app"
-
-CMD ["streamlit", "run", "app/Home.py"]
+CMD ["streamlit", "run", "app/app.py"]
