@@ -1,0 +1,31 @@
+[[pages]]
+name = "Overview"
+icon = "💡"
+is_section = true
+
+[[pages]]
+path = "views/home.py"
+name = "Home"
+icon = ":material/home:"
+
+[[pages]]
+name = "Analysis by Sample"
+icon = ":material:science:"
+is_section = true
+
+[[pages]]
+name = "About"
+icon = ":regional_indicator_t:"
+is_section = true
+
+[[pages]]
+path = "views/faqs.py"
+name = "FAQs"
+icon = ":grey_question:"
+
+
+[[pages]]
+path = "views/about.py"
+name = "About Us"
+icon = ":material/account_circle:"
+

@@ -1,0 +1,29 @@
+[[pages]]
+name = "Analysis by Sample"
+icon = ":bar_chart:"
+is_section = true
+
+[[pages]]
+path = "views/analysis/data_collection.py"
+name = ""
+icon = ":material/chevron_right:"
+
+[[pages]]
+path = "views/analysis/graph_construction.py"
+name = "Graph Page"
+icon = ":material/chevron_right:"
+
+[[pages]]
+path = "views/analysis/model_training.py"
+name = "Model Training Page"
+icon = ":material/chevron_right:"
+
+[[pages]]
+path = "views/analysis/model_evaluation.py"
+name = "Model Evaluation Page"
+icon = ":material/chevron_right:"
+
+[[pages]]
+path = "views/analysis/model_prediction.py"
+name = "Model Predictions Page"
+icon = ":material/chevron_right:"
