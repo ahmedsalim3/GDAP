@@ -107,7 +107,7 @@ with col1.container(border=True):
         min_value=50,
         max_value=5000000,
         step=500,
-        value=100,
+        value=2500000,
         help="This depends solely on the length of the negative genes and the potential positives.",
     )
     ppi_button = st.button("Fetch PPI Data")
