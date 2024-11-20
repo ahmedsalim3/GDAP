@@ -11,7 +11,7 @@ This project is composed of three levels:
 To install and run the project, you will need:
 - **Python 3.x**: Ensure you have Python 3.x installed. You can download it from [python.org](https://www.python.org/).
 - **pip**: Python package installer should be available.
-- **Dependencies**: The project requires the Python packages listed in [configs/requirements.txt](./configs/requirements.txt).
+- **Dependencies**: The project requires the Python packages listed in [requirements.txt](./requirements.txt).
 
 ## How to install
 
@@ -25,13 +25,13 @@ To install and run the project, you will need:
 2. **Checkout to `ahmed` branch**:
     ```bash
     git checkout ahmed
-    git pull
+    git pull origin ahmed
     ```
 
 3. **Create a Virtual Environment** (optional but recommended):
     - On Linux/MacOS:
         ```bash
-        python -m venv <envname> # <envname> is your environment name
+        python3 -m venv <envname> # <envname> is your environment name
         source <envname>/bin/activate
         ```
     - On Windows:
@@ -47,30 +47,54 @@ To install and run the project, you will need:
 
 3. **Install Dependencies:**:
     ```bash
-    pip install -r configs/requirements.txt
+    pip install -r requirements.txt
     ```
 ## How to Run the Script
 
 1. Go to [Open Target Platform](https://platform.opentargets.org/) and obtain the disease `EFO ID`.
 
-2. Update the configuration in [config.py](./src/config.py) for your experiment. If you choose BigQuery as a data source, ensure you set up your `GOOGLE_APPLICATION_CREDENTIALS` and follow the steps in [TODO](./src/open_targets/TODO.md) to obtain the necessary JSON key files.
+2. Update the configuration in [config.py](./src/config.py) for your experiment. If you choose BigQuery as a data source, ensure you set up your `GOOGLE_APPLICATION_CREDENTIALS` and follow the [steps](./docs/reports/google_cloud_setup.md) to obtain the necessary JSON key files.
 
 3. From the project root, run the script:
 
     ```bash
-    python -m src.main
+    cd src/
+    python3 main.py
     ```
-4. The results will be saved in the [results/<disease-name>](./results/) directory.
 
 ## How to Run the App
 
+Running Locally
+
 1. Run the following command from the project root:
+
     ```sh
-    python -m streamlit run app/Home.py
+    # running as a module
+    python3 -m streamlit run app/app.py
     ```
-2. Open your browser and navigate to your local or network URL:
-    - Local URL: `http://localhost:8501`
-    - Network URL: `http://192.168.45.100:8501`
+    
+2. Alternatively, you can install the package and run it from the app directory:
+
+    ```sh
+    pip install .
+    streamlit run app/Home.py
+    ```
+
+## Running the App via Docker
+
+To run the app using Docker, follow these steps:
+
+1. Build the Docker image:
+
+  ```sh
+  docker build -t image_name .
+  ```
+
+2. Run the Docker container:
+
+  ```sh
+  docker run -p 8501:8501 image_name
+  ```
 
 ## Repo's directory structure
 
@@ -78,59 +102,54 @@ The directory structure below shows the nature of files/directories used in this
 
 ```sh
 BI-ML_Disease-Prediction_2024
-├── CHANGELOG.md      <- Log of changes made
-│
+## Repo's directory structure
+
+The directory structure below shows the nature of files/directories used in this repo.
+
+```sh
+BI-ML_Disease-Prediction_2024
+├── CHANGELOG.md            <- Log of changes made
 ├── README.md
+├── .gitignore              <- Specifies intentionally untracked files to ignore by git
+├── requirements.txt        <- Python dependencies
+├── start_app.sh            <- Streamlit app start script
 │
-├── .gitignore        <- Specifies intentionally untracked files to ignore by git
 │
-├── configs           <- Dir to store config files. Conda env, requirements.txt, etc.
-│   ├── requirements.txt
-│   └── conda_requirements.txt
+├── data                    <- Dir structure for data
+│   ├── external            <- Data from third party sources
+│   ├── interim             <- Intermediate data that has been transformed
+│   ├── processed           <- The final, canonical datasets and results
+│   └── raw                 <- The original, immutable data dump
 │
-├── data              <- Dir structure.
-│   ├── external      <- Data from third party sources
-│   │── interim       <- Intermediate data that has been transformed.
-│   ├── processed     <- The final, canonical datasets and results
-│   └── raw           <- The original, immutable data dump
+├── docs                    <- Dir to store documentation
+│   ├── icons
+│   ├── images
+│   ├── index.md
+│   └── reports
 │
-├── docs              <- Dir to store documentation.
-│
-├── models            <- Trained and serialized models, model predictions, or model summaries
-│
-├── notebooks         <- Jupyter notebooks and experiments
+├── notebooks               <- Jupyter notebooks and experiments
 │   ├── main.ipynb
 │   └── network-analysis.ipynb
 │
-├── src               <- Source code for the project
-│   ├── open_targets/
-│   ├── graph_analysis/
+├── src                     <- Source code for the project
 │   ├── config.py
-│   ├── main.py
-│   ├── edge_utils.py
-│   ├── embeddings.py
-│   ├── edge_predictions.py
-│   ├── ml_models.py
-│   ├── model_evaluation.py
-│   ├── bigraph.py
-│   └── ppi_data.py
-│ 
-└── app               <- Streamlit app
-    ├── pages/
-    ├── screenshots/
-    ├── Home.py
-    ├── functions.py
-    ├── model_parms.py
-    ├── model_training.py
-    ├── ui.py
-    ├── utils.py
-    └── visualizations.py
+│   ├── gene_disease        <- Main package
+│   └── main.py
+│
+└── app                     <- Streamlit apps and associated files
+    ├── app.py              <- Streamlit app-1
+    ├── st_app.py           <- Streamlit app-2 (st_pages)
+    ├── models/
+    ├── streamlit_helpers/
+    ├── tools/
+    ├── utils/
+    └── views/
 
 ```
 
 ## Team Structure and Contribution
 
-Use this space to write your team names and their contribution.
+@[ahmedsalim3](https://github.com/ahmedsalim3)
 
 ## References
 
