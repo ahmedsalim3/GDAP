@@ -20,6 +20,7 @@ results/
 !.streamlit/pages.toml
 !.streamlit/pages_sections.toml
 !*/frontend/.env
+secrets.toml
 
 # Visual Studio Code
 .vscode/*
