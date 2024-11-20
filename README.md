@@ -102,12 +102,6 @@ The directory structure below shows the nature of files/directories used in this
 
 ```sh
 BI-ML_Disease-Prediction_2024
-## Repo's directory structure
-
-The directory structure below shows the nature of files/directories used in this repo.
-
-```sh
-BI-ML_Disease-Prediction_2024
 ├── CHANGELOG.md            <- Log of changes made
 ├── README.md
 ├── .gitignore              <- Specifies intentionally untracked files to ignore by git
