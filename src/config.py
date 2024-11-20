@@ -17,5 +17,5 @@ class Config:
     EMBEDDING_MODE = "GGVec"  # Options: 'Node2Vec', 'ProNE', 'GGVec', 'degree_avg'
     MODEL_NAME = "Logistic_Regression"  # Options: 'Random_Forest', 'Gradient_Boosting', 'SVM', 'Logistic_Regression'
     TEST_SIZE = 0.2  # Train/Test split ratio
-    OUTPUT_DIR = PROJ_ROOT / "wohow/"  # Output folder path
+    OUTPUT_DIR = PROJ_ROOT / "results/"  # Output folder path to save embeddings, models, predictions, etc.
     CREDENTIALS = PROJ_ROOT / "configs/stemaway-d5a18133ff83.json"  # Credentials path if using BigQueryClient as a data source
