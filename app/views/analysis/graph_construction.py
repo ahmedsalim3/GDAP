@@ -113,8 +113,7 @@ if create_graph_button:
     with col1.status("Constructing disease-gene PPI network...", expanded=True) as creating:
         # Check if both datasets exist
         if check_state("ot_df", "ppi_df", check_all=True):
-            if check_state("G"):
-                delete_state
+
             G, pos_edges, neg_edges = create_graph(
                 ot_df=_state.ot_df,
                 ppi_df=_state.ppi_df,
