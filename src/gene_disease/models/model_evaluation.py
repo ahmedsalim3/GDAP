@@ -230,7 +230,6 @@ class ModelEvaluation:
         ax3.grid(False)
 
         ax4 = fig.add_subplot(gs[2, :])
-        ax4.hist(self.y_pred_proba, bins=30, color="green", alpha=0.7, density=True)
         ax4.hist(
             self.y_pred_proba[self.y_test == 1],
             bins=30,
