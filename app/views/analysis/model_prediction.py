@@ -97,11 +97,39 @@ if prediction_button:
             persist("associated_df", associated_df)
             persist("non_associated_df", non_associated_df)
 
-            UI.task_status("Prediction Completed", "✅")
+            UI.task_status("Validation Prediction Completed", "✅")
             UI.flash_message(
                 "associated_df",
                 "non_associated_df",
-                message=f"predictions for {_state['disease_name']} were made successfully!",
+                message=f"predictions for {_state['disease_name']} were made successfully!\n\nValidation Length: {len(X_val)}",
+                col=col1,
+            )
+            
+            st.balloons()
+            st.snow()
+        
+        elif data == "Testing data":
+            model = _state.classifier
+            X_test = _state.X_test
+            edges_test = _state.edges_test
+
+            from gene_disease.edges.edge_predictions import predict, prediction_results
+
+            associated_proteins, non_associated_proteins = predict(
+                model, X_test, edges_test, threshold=threshold
+            )
+            associated_df, non_associated_df = prediction_results(
+                associated_proteins, non_associated_proteins
+            )
+
+            persist("associated_df", associated_df)
+            persist("non_associated_df", non_associated_df)
+
+            UI.task_status("Testing Prediction Completed", "✅")
+            UI.flash_message(
+                "associated_df",
+                "non_associated_df",
+                message=f"predictions for {_state['disease_name']} were made successfully!\n\nTesting Length: {len(X_test)}",
                 col=col1,
             )
             
