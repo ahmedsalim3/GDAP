@@ -183,7 +183,9 @@ def pyvis_visualization(num_nodes):
     # add edges with weights
     for u, v, data in G.edges(data=True):
         weight = data.get("weight")
-        disease_net.add_edge(u, v, width=weight, title=f"Weight: {weight:.2f}")
+        edge_type = data.get("type")
+        title = f"Weight: {weight:.2f}\nType: {edge_type}"
+        disease_net.add_edge(u, v, width=weight, title=title)
 
     # ================ Physics Settings ================
 
