@@ -66,7 +66,7 @@ class ModelEvaluator:
         self.figsize = figsize
         self.history_figsize = history_figsize
         self.primaryColor = "#4fd8a0"  # Light green (primary color)
-        self.secondaryColor = "#2e8b57"
+        self.secondaryColor = "#1f3a60" 
 
         if is_tf_model:
             self.y_pred_proba = self.model.predict(self.X).flatten()
@@ -237,11 +237,11 @@ class ModelEvaluator:
         ax3.grid(False)
 
         ax4 = fig.add_subplot(gs[2, :])
-        ax4.hist(self.y_pred_proba, bins=30, color=self.secondaryColor, alpha=0.7, density=True)
+
         ax4.hist(
             self.y_pred_proba[self.Y == 1],
             bins=30,
-            color=self.secondaryColor,
+            color=self.primaryColor,
             alpha=0.5,
             density=True,
             label="disease-gene associations Probabilities",
@@ -249,7 +249,7 @@ class ModelEvaluator:
         ax4.hist(
             self.y_pred_proba[self.Y == 0],
             bins=30,
-            color=self.primaryColor,
+            color=self.secondaryColor,
             alpha=0.5,
             density=True,
             label="non-associated genes Probabilities",
@@ -258,7 +258,7 @@ class ModelEvaluator:
         sns.kdeplot(
             self.y_pred_proba,
             fill=True,
-            color="skyblue",
+            color="#e5e5e5",
             ax=ax4,
             lw=2,
             label="Density",
