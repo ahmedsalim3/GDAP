@@ -7,7 +7,9 @@ import streamlit as st
 from utils.style import footer, sidebar_footer
 
 # from utils.style import page_layout
-
+import sys
+import os
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../src")))
 from streamlit.logger import get_logger
 
 LOGGER = get_logger(__name__)

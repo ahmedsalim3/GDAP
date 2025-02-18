@@ -142,7 +142,7 @@ if ot_button:
                     label=f"{disease_name} data Fetched successfully!", state="complete", expanded=False
                 )
             except Exception as e:
-                col1.error("Please enter a valid EFO-ID.")
+                col1.error(f"Error fetching data: {e}")
                 ot_df, disease_name = None, None
                 fetching.update(label=f"Failed to fetch disease data", state="error")
 
