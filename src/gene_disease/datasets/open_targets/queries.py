@@ -10,13 +10,13 @@ SELECT
   overall_indirect.score AS indirect_score,
   overall_indirect.evidenceCount AS indirect_evidence_count
 FROM
-  `open-targets-prod.platform.associationByOverallIndirect` AS overall_indirect
+  `open-targets-prod.platform.association_by_overall_indirect` AS overall_indirect
 JOIN
-  `open-targets-prod.platform.diseases` AS diseases
+  `open-targets-prod.platform.disease` AS diseases
 ON
   overall_indirect.diseaseId = diseases.id
 JOIN
-  `open-targets-prod.platform.targets` AS targets
+  `open-targets-prod.platform.target` AS targets
 ON
   overall_indirect.targetId = targets.id
 WHERE
@@ -33,13 +33,13 @@ SELECT
   overall_direct.score AS direct_score,
   overall_direct.evidenceCount AS direct_evidence_count
 FROM
-  `open-targets-prod.platform.associationByOverallDirect` AS overall_direct
+  `open-targets-prod.platform.association_overall_direct` AS overall_direct
 JOIN
-  `open-targets-prod.platform.diseases` AS diseases
+  `open-targets-prod.platform.disease` AS diseases
 ON
   overall_direct.diseaseId = diseases.id
 JOIN
-  `open-targets-prod.platform.targets` AS targets
+  `open-targets-prod.platform.target` AS targets
 ON
   overall_direct.targetId = targets.id
 WHERE
