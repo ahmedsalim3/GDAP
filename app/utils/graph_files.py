@@ -2,17 +2,17 @@
 #  Utility functions to save graph data in memory buffers and provide download options for various graph formats.
 ###################################################################################################################################
 
+import io
+
+import networkx as nx
+import numpy as np
+import pandas as pd
 import streamlit as st
 from streamlit import session_state as _state
 from utils import state
-import io
-import networkx as nx
-import pandas as pd
-import numpy as np
 
 
-def create_graph_buffers(G, pos_edges, neg_edges):
-
+def create_graph_buffers(G, pos_edges, neg_edges) -> None:
     edgelist_buffer = io.BytesIO()
     nx.write_edgelist(G, edgelist_buffer, data=True)
     edgelist_buffer.seek(0)
@@ -41,7 +41,7 @@ def create_graph_buffers(G, pos_edges, neg_edges):
     state.persist("neg_edges_buffer", neg_edges_buffer)
 
 
-def download_graph_files():
+def download_graph_files() -> None:
     c1, c2, c3, c4, c5 = st.columns(5)
     c1.download_button(
         label="Edge List",

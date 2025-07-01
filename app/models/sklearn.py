@@ -2,11 +2,10 @@
 # A class to handle different sklearn classifiers, model training, validation, and evaluation.
 ###################################################################################################################################
 
-from gene_disease.models.model_training import train_model, validate_model
+from gdap.models.model_training import train_model, validate_model
 
 
 class SkLearn:
-
     @staticmethod
     def classifier(_state):
         classifier_options = _state["classifier_options"]
@@ -53,7 +52,7 @@ class SkLearn:
         )
 
     @staticmethod
-    def evaluate(_state, threshold, data=None):
+    def evaluate(_state, threshold, data=None) -> None:
         from tools.model_evaluator import ModelEvaluator
 
         if data == "Validation Data":

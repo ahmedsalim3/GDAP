@@ -2,16 +2,16 @@
 #  Functions for visualizing a sampled disease-related network using NetworkX (static) and PyVis (interactive) in Streamlit page
 ###################################################################################################################################
 
-import streamlit as st
-from streamlit import session_state as _state
-import networkx as nx
-from pyvis.network import Network
-from networkx.algorithms import community
-import streamlit.components.v1 as components
-import matplotlib.pyplot as plt
 import random
 import tempfile
 
+import matplotlib.pyplot as plt
+import networkx as nx
+import streamlit as st
+import streamlit.components.v1 as components
+from networkx.algorithms import community
+from pyvis.network import Network
+from streamlit import session_state as _state
 
 
 def _sample_graph(num_nodes):
@@ -22,8 +22,8 @@ def _sample_graph(num_nodes):
     Parameters
     ----------
     num_nodes: The number of nodes to sample and create a subgraph from
+
     """
-    
     G = _state["G"]
     if num_nodes > len(G.nodes):
         raise ValueError("Number of nodes to sample exceeds the total number of nodes in the graph.")
@@ -37,7 +37,7 @@ def _sample_graph(num_nodes):
 def sample_graph(num_nodes):
     """
     Create a subgraph from the original gragh G in session state
-    with the specified number of nodes, including the disease node
+    with the specified number of nodes, including the disease node.
 
     Parameters
     ----------
@@ -47,9 +47,7 @@ def sample_graph(num_nodes):
     G = _state["G"]
     disease_name = _state["disease_name"].lower()
 
-    disease_node = next(
-        (n for n in G.nodes if isinstance(n, str) and disease_name in n.lower()), None
-    )
+    disease_node = next((n for n in G.nodes if isinstance(n, str) and disease_name in n.lower()), None)
 
     if disease_node:
         remaining_nodes_sample = random.sample(
@@ -64,7 +62,7 @@ def sample_graph(num_nodes):
     return sampled_graph
 
 
-def networkx_visualization(num_nodes):
+def networkx_visualization(num_nodes) -> None:
     """
     Visualizes a static networkx sampled graph in Streamlit application using
     NetworkX with community detection (modularity) and edge weights.
@@ -72,8 +70,8 @@ def networkx_visualization(num_nodes):
     Parameters
     ----------
     num_nodes: The number of nodes to sample and create a subgraph from
-    """
 
+    """
     G = sample_graph(num_nodes)
     disease_name = _state["disease_name"].lower()
 
@@ -91,7 +89,7 @@ def networkx_visualization(num_nodes):
         pos,
         with_labels=True,
         node_color=colors,
-        cmap=plt.cm.jet,
+        cmap=plt.get_cmap('jet'),
         edge_color="gray",
         node_size=2000,
         arrows=True,
@@ -102,12 +100,14 @@ def networkx_visualization(num_nodes):
     edge_labels = nx.get_edge_attributes(G, "weight")
     edge_labels = {k: f"{v:.3f}" for k, v in edge_labels.items()}
     nx.draw_networkx_edge_labels(G, pos, edge_labels=edge_labels, font_color="red")
-    title = f"Sample graph with {num_nodes} nodes for {disease_name} disease\nOriginal graph has {len(_state["G"])} nodes"
+    title = (
+        f"Sample graph with {num_nodes} nodes for {disease_name} disease\nOriginal graph has {len(_state['G'])} nodes"
+    )
     plt.title(title, fontsize=12, fontweight="bold")
-    st.pyplot(plt)
+    st.pyplot(plt.gcf())
 
 
-def weight_to_color(weight, min_weight, max_weight):
+def weight_to_color(weight, min_weight, max_weight) -> str:
     """
     Converts a weight value to a color gradient based on its normalized value.
 
@@ -125,7 +125,6 @@ def pyvis_visualization(num_nodes):
     Visualizes an interactive sample graph in Streamlit application
     using PyVis, with nodes colored based on edge weights to the disease.
     """
-
     G = sample_graph(num_nodes)
     disease_name = _state["disease_name"].lower()
 
@@ -137,9 +136,7 @@ def pyvis_visualization(num_nodes):
     #     for node in comm:
     #         node_colors[node] = i
 
-    disease_node = next(
-        (n for n in G.nodes if isinstance(n, str) and disease_name in n.lower()), None
-    )
+    disease_node = next((n for n in G.nodes if isinstance(n, str) and disease_name in n.lower()), None)
 
     # weights of the edges connected to the disease node
     disease_weights = {}
@@ -152,10 +149,8 @@ def pyvis_visualization(num_nodes):
     max_weight = max(disease_weights.values())
 
     # ================ Initialize PyVis Network ================
-    disease_net = Network(
-        height="900px", width="100%", bgcolor="#222222", font_color="white"
-    )
-    
+    disease_net = Network(height="900px", width="100%", bgcolor="#222222", font_color="white")
+
     # NOTE: you can convert it into PyVis (will not show 'weights')
     # disease_net.from_nx(G)
 
@@ -163,7 +158,7 @@ def pyvis_visualization(num_nodes):
     for node in G.nodes:
         if not isinstance(node, (str, int)):
             node = str(node)
- 
+
         if node == disease_name:
             color = "#EDF2E9"
             size = 40

@@ -7,13 +7,12 @@
 import streamlit as st
 from streamlit import session_state as _state
 from streamlit_helpers.cache_data import (
+    convert_df,
     fetch_bq_direct_scores,
     fetch_bq_indirect_scores,
     fetch_graphql_data,
-    convert_df,
     fetch_ppi_db,
 )
-
 from utils import state
 from utils import ui as UI
 
@@ -62,13 +61,11 @@ col1, col2, col3 = st.columns([3.5, 5, 2], gap="small", vertical_alignment="top"
 # ==========================
 
 with col1.container(border=True):
-    st.markdown(
-        '<h3 style="text-align: center;">Parameters</h3>', unsafe_allow_html=True
-    )
+    st.markdown('<h3 style="text-align: center;">Parameters</h3>', unsafe_allow_html=True)
     # st.markdown("-----")
 
     # ================ OPEN-TAGETS ================
-    
+
     st.markdown("##### Disease Data")
     state.init_values("previous_disease_id")
 
@@ -138,13 +135,11 @@ if ot_button:
                     ot_df, disease_name = fetch_bq_direct_scores(params)
                 elif data_source == "Indirect Scores (BigQuery)":
                     ot_df, disease_name = fetch_bq_indirect_scores(params)
-                fetching.update(
-                    label=f"{disease_name} data Fetched successfully!", state="complete", expanded=False
-                )
+                fetching.update(label=f"{disease_name} data Fetched successfully!", state="complete", expanded=False)
             except Exception as e:
                 col1.error(f"Error fetching data: {e}")
                 ot_df, disease_name = None, None
-                fetching.update(label=f"Failed to fetch disease data", state="error")
+                fetching.update(label="Failed to fetch disease data", state="error")
 
         if ot_df is not None:
             state.persist("ot_df", ot_df)
@@ -155,7 +150,7 @@ if ot_button:
                 message=f"{_state.disease_name} related data fetched successfully!",
                 col=col1,
             )
-            UI.task_status(f"Fetching Target dataset", "✅")
+            UI.task_status("Fetching Target dataset", "✅")
     else:
         col1.error("Please enter a valid EFO-ID.")
 
@@ -165,10 +160,10 @@ if ppi_button:
     with col1.status("Processing protein-protein interactions...") as loading:
         if state.check_state("ot_df"):
             ppi_df = fetch_ppi_db(max_ppi_interactions)
-            loading.update(label=f"PPI Data fetched successfully!", state="complete")
+            loading.update(label="PPI Data fetched successfully!", state="complete")
         else:
             col1.error("Please fetch disease data first")
-            loading.update(label=f"Failed to load PPI data", state="error")
+            loading.update(label="Failed to load PPI data", state="error")
             ppi_df = None
 
     if ppi_df is not None:
@@ -191,9 +186,7 @@ if state.check_state("ot_df", "ppi_df"):
 
 # Display Open Targets Data
 if state.check_state("ot_df"):
-    expander = tab1.expander(
-        f"Click here to see {_state.disease_name} data", expanded=True
-    )
+    expander = tab1.expander(f"Click here to see {_state.disease_name} data", expanded=True)
     expander.dataframe(_state.ot_df, width=1000)
 
     c1, c2, c3 = expander.columns([2, 1, 1])

@@ -1,5 +1,5 @@
 ###################################################################################################################################
-# Third page of the Analysis section: 
+# Third page of the Analysis section:
 #  - Embedding generation and feature extraction
 #  - Data splitting for training, validation, and testing
 #  - Classifier model training and validation
@@ -8,18 +8,17 @@
 import streamlit as st
 from streamlit import session_state as _state
 from streamlit_helpers.embeddings import embedding_generator
-from gene_disease.edges.edge_utils import (
+from utils import ui as UI
+from utils.models_files import download_clasifer, download_classifier_button
+from utils.state import check_state, init_values, manage_state, persist
+
+from gdap.edges.edge_utils import (
     features_labels_edges,
-    map_nodes,
     features_labels_edges_idx,
+    map_nodes,
     split_edge_data,
 )
-
 from models import model_parms as MODEL
-
-from utils.models_files import download_clasifer, download_classifier_button
-from utils.state import persist, init_values, check_state, manage_state
-from utils import ui as UI
 
 # from utils.style import page_layout
 
@@ -38,7 +37,7 @@ st.markdown(
 st.write(
     """
     DESCRIPTIVE TEXTS
-    
+
     -------
     """
 )
@@ -96,9 +95,7 @@ with col1.container(border=True):
 # ================ CLASSIFIER MODEL SELECTION ================
 
 with col2.container(border=True):
-    st.markdown(
-        '<h3 style="text-align: center;">Model Training</h3>', unsafe_allow_html=True
-    )
+    st.markdown('<h3 style="text-align: center;">Model Training</h3>', unsafe_allow_html=True)
     init_values("previous_classifier")
 
     col2_left, right = st.columns([1, 1], vertical_alignment="top")
@@ -149,7 +146,7 @@ if embedding_button:
         persist("embeddings_mode", embeddings_mode)
         persist("embeddings", embeddings)
         UI.task_status("Generating Embeddings", "✅")
-        UI.results_status(f"Embeddings length", len(embeddings))
+        UI.results_status("Embeddings length", len(embeddings))
         UI.flash_message(
             "embeddings",
             message=f"{len(embeddings)} embeddings Generated using {embeddings_mode}!",
@@ -159,17 +156,13 @@ if embedding_button:
         # ================ FEATURE ENGINEERING ================
 
         with col1_left:
-            with st.spinner(f"Feature extracting"):
+            with st.spinner("Feature extracting"):
                 if embeddings_mode == "Simple Node Embedding":
-                    X, y, edges = features_labels_edges(
-                        pos_edges, neg_edges, embeddings
-                    )
+                    X, y, edges = features_labels_edges(pos_edges, neg_edges, embeddings)
 
                 else:
                     node_to_index = map_nodes(G)
-                    X, y, edges = features_labels_edges_idx(
-                        pos_edges, neg_edges, embeddings, node_to_index
-                    )
+                    X, y, edges = features_labels_edges_idx(pos_edges, neg_edges, embeddings, node_to_index)
 
         persist("X", X)
         persist("y", y)
@@ -218,22 +211,14 @@ if test_size_button:
         persist("edges_test", edges_test)
 
         UI.task_status("Splitting data", "✅")
-        UI.flash_message(
-            "X_train", "y_train", message=f"Data split successfully!", col=col1
-        )
+        UI.flash_message("X_train", "y_train", message="Data split successfully!", col=col1)
 
-        UI.results_status(
-            f"Train size", (_state["X_train"].shape, _state["y_train"].shape)
-        )
-        UI.results_status(
-            f"Test size", (_state["X_test"].shape, _state["y_test"].shape)
-        )
-        UI.results_status(f"Val size", (_state["X_val"].shape, _state["y_val"].shape))
+        UI.results_status("Train size", (_state["X_train"].shape, _state["y_train"].shape))
+        UI.results_status("Test size", (_state["X_test"].shape, _state["y_test"].shape))
+        UI.results_status("Val size", (_state["X_val"].shape, _state["y_val"].shape))
 
     else:
-        col1.error(
-            "Cannot split data because features are not defined, please generate embeddings first."
-        )
+        col1.error("Cannot split data because features are not defined, please generate embeddings first.")
 
 
 # ==========================
@@ -274,7 +259,6 @@ if classifier_button:
         "edges_test",
         check_all=True,
     ):
-
         with col2_left:
             with st.spinner(f"Training {classifier_options} model..") as training:
                 if classifier_options == "TensorFlow":
@@ -292,12 +276,12 @@ if classifier_button:
 
                     persist("classifier", classifier)
                     persist("history", history)
-                    
+
                     UI.results_status(
-                        f"Test accuracy",
+                        "Test accuracy",
                         f"{acc:.4f}",
                     )
-                    
+
                     UI.results_status(
                         "Test loss",
                         f"{loss * 2:.4f}",
@@ -306,7 +290,6 @@ if classifier_button:
                     test_results, val_results = TF.valid(_state)
 
                 else:
-
                     from models.sklearn import SkLearn as SK
 
                     _classifier = SK.classifier(_state)
@@ -319,31 +302,29 @@ if classifier_button:
                     )
 
                     test_results, val_results = SK.valid(_state)
-                
+
                 UI.task_status("Training Model", "✅")
-                
+
                 UI.flash_message(
                     "classifier",
                     message=f"{_state.classifier_options} training completed!",
                     col=col1,
                 )
-                
+
                 UI.results_status(
-                    f"(Test Set)",
+                    "(Test Set)",
                     test_results,
                     dict_name="model_results",
                 )
-                
+
                 UI.results_status(
-                    f"(Validation Set)",
+                    "(Validation Set)",
                     val_results,
                     dict_name="model_results",
                 )
-                
+
     else:
-        col2.error(
-            "No data available for training. Please ensure you have prepared your dataset on the previous page"
-        )
+        col2.error("No data available for training. Please ensure you have prepared your dataset on the previous page")
 
 
 # Display model's download button
@@ -365,7 +346,11 @@ UI.show_results_status(
 )
 
 # Model training results
-UI.show_results_status(col3, stages=["Test accuracy", "Test loss", "Mean F1-score"], header="Model Training Results",)
+UI.show_results_status(
+    col3,
+    stages=["Test accuracy", "Test loss", "Mean F1-score"],
+    header="Model Training Results",
+)
 # UI.show_results_status(col3, stages=["Selected Model", "(Test Set)", "(Validation Set)"], header="Model Training Results2", )
 UI.show_model_results(col3)
 

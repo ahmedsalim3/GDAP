@@ -7,12 +7,11 @@
 import streamlit as st
 from streamlit import session_state as _state
 from streamlit_helpers.cache_data import create_graph
-from streamlit_helpers.cache_data import create_graph
-
-from tools.graph_visualization import pyvis_visualization, networkx_visualization
-from utils.state import persist, check_state, manage_state, delete_state
-from utils.graph_files import create_graph_buffers, download_graph_files
+from tools.graph_visualization import networkx_visualization, pyvis_visualization
 from utils import ui as UI
+from utils.graph_files import create_graph_buffers, download_graph_files
+from utils.state import check_state, delete_state, manage_state, persist
+from typing import Optional
 
 # from utils.style import page_layout
 
@@ -31,7 +30,7 @@ st.markdown(
 st.write(
     """
     DESCRIPTIVE TEXTS
-    
+
     -------
     """
 )
@@ -64,6 +63,7 @@ with col1.container(border=True):
     )
 
     top_pos_checkbox = c1.checkbox("Top Positives Only?")
+    top_pos: Optional[int] = None
     if top_pos_checkbox:
         top_pos = c1.slider(
             "Top Positive Percentage:",
@@ -72,9 +72,6 @@ with col1.container(border=True):
             value=100,
             help="Limit the graph to a percentage of the highest-scoring disease-gene associations.",
         )
-
-    else:
-        top_pos = None
 
     if top_pos_checkbox and not check_state("G"):
         col1.warning(
@@ -93,7 +90,7 @@ with col1.container(border=True):
     spyvis_visualize_button = c3.button("Interactive Visualization (PyVis)")
 
     num_nodes = c4.slider(
-        f"Number of nodes to visualize",
+        "Number of nodes to visualize",
         min_value=100,
         max_value=500,
         value=200,
@@ -107,13 +104,22 @@ with col1.container(border=True):
 
 if create_graph_button:
     # If there is a re-creation of the graph, delete the previous states
-    if check_state("edgelist_buffer", "graphml_buffer", "edges_csv_buffer", "pos_edges_buffer", "neg_edges_buffer", "G", check_all=True):
-        delete_state("edgelist_buffer", "graphml_buffer", "edges_csv_buffer", "pos_edges_buffer", "neg_edges_buffer", "G")
-    
+    if check_state(
+        "edgelist_buffer",
+        "graphml_buffer",
+        "edges_csv_buffer",
+        "pos_edges_buffer",
+        "neg_edges_buffer",
+        "G",
+        check_all=True,
+    ):
+        delete_state(
+            "edgelist_buffer", "graphml_buffer", "edges_csv_buffer", "pos_edges_buffer", "neg_edges_buffer", "G"
+        )
+
     with col1.status("Constructing disease-gene PPI network...", expanded=True) as creating:
         # Check if both datasets exist
         if check_state("ot_df", "ppi_df", check_all=True):
-
             G, pos_edges, neg_edges = create_graph(
                 ot_df=_state.ot_df,
                 ppi_df=_state.ppi_df,
@@ -121,11 +127,11 @@ if create_graph_button:
                 neg_to_pos=neg_to_pos,
             )
             creating.update(label=f"{_state.disease_name}-gene PPI network was constructed.")
-            
+
             persist("G", G)
             persist("pos_edges", pos_edges)
             persist("neg_edges", neg_edges)
-            
+
             UI.flash_message(
                 "G",
                 message=f"{_state.disease_name} and PPI Bigraph created with {len(pos_edges)} positive edges and {len(neg_edges)} negative edges!",
@@ -135,21 +141,25 @@ if create_graph_button:
             UI.results_status("Graph nodes", len(G))
             UI.results_status("Positive edges", len(pos_edges))
             UI.results_status("Negative edges", len(neg_edges))
-        
+
         else:
-            creating.update(label=f"Graph creation failed", state="error")
+            creating.update(label="Graph creation failed", state="error")
             col1.error("Please fetch both the open target and string datasets first to create the graph.")
             G, pos_edges, neg_edges = None, None, None
 
 
 # Display download buttons
 if check_state("G", "pos_edges", "neg_edges", check_all=True):
-    if not check_state("edgelist_buffer", "graphml_buffer", "edges_csv_buffer", "pos_edges_buffer", "neg_edges_buffer", check_all=True):
+    if not check_state(
+        "edgelist_buffer", "graphml_buffer", "edges_csv_buffer", "pos_edges_buffer", "neg_edges_buffer", check_all=True
+    ):
         if c2.button("Download Graph"):
             with col1.status("Creating graph buffers...") as buffer_creating:
                 create_graph_buffers(_state.G, _state.pos_edges, _state.neg_edges)
                 buffer_creating.update(label="Graph buffers were created successfully.")
-    if check_state("edgelist_buffer", "graphml_buffer", "edges_csv_buffer", "pos_edges_buffer", "neg_edges_buffer", check_all=True):
+    if check_state(
+        "edgelist_buffer", "graphml_buffer", "edges_csv_buffer", "pos_edges_buffer", "neg_edges_buffer", check_all=True
+    ):
         with col1.expander("Download Graph Data", expanded=False):
             download_graph_files()
 
@@ -157,7 +167,6 @@ if check_state("G", "pos_edges", "neg_edges", check_all=True):
 
 if static_visualize_button:
     if check_state("G"):
-
         with col1:
             networkx_visualization(num_nodes=num_nodes)
     else:

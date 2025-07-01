@@ -2,8 +2,9 @@
 # Home page of the app. Displays the app title, an image, and an introductory markdown report.
 #######################################################################################################################################
 
-import streamlit as st
 from pathlib import Path
+
+import streamlit as st
 
 PROJ_ROOT = Path(__file__).resolve().parents[2]
 IMAGE = PROJ_ROOT / "docs/images/app_home.png"

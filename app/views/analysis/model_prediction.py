@@ -6,9 +6,8 @@
 
 import streamlit as st
 from streamlit import session_state as _state
-
-from utils.state import persist, check_state, manage_state
 from utils import ui as UI
+from utils.state import check_state, manage_state, persist
 
 # from utils.style import page_layout
 
@@ -28,7 +27,7 @@ st.markdown(
 st.write(
     """
     DESCRIPTIVE TEXTS
-    
+
     """
 )
 
@@ -42,7 +41,6 @@ col1, col2, col3 = st.columns([3.5, 5, 2], gap="small", vertical_alignment="top"
 # ==========================
 
 with col1.container(border=True):
-
     st.markdown("##### Model Prediction")
 
     left, right = st.columns(2, vertical_alignment="top")
@@ -72,27 +70,18 @@ with col1.container(border=True):
 
 if prediction_button:
     if not check_state("classifier"):
-        col1.error(
-            "No model has been trained yet. Please train a model before proceeding with predictions"
-        )
+        col1.error("No model has been trained yet. Please train a model before proceeding with predictions")
 
-    if check_state(
-        "classifier", "X_val", "X_test", "edges_val", "edges_test", check_all=True
-    ):
-
+    if check_state("classifier", "X_val", "X_test", "edges_val", "edges_test", check_all=True):
         if data == "Validation data":
             model = _state.classifier
             X_val = _state.X_val
             edges_val = _state.edges_val
 
-            from gene_disease.edges.edge_predictions import predict, prediction_results
+            from gdap.edges.edge_predictions import predict, prediction_results
 
-            associated_proteins, non_associated_proteins = predict(
-                model, X_val, edges_val, threshold=threshold
-            )
-            associated_df, non_associated_df = prediction_results(
-                associated_proteins, non_associated_proteins
-            )
+            associated_proteins, non_associated_proteins = predict(model, X_val, edges_val, threshold=threshold)
+            associated_df, non_associated_df = prediction_results(associated_proteins, non_associated_proteins)
 
             persist("associated_df", associated_df)
             persist("non_associated_df", non_associated_df)
@@ -104,23 +93,19 @@ if prediction_button:
                 message=f"predictions for {_state['disease_name']} were made successfully!\n\nValidation Length: {len(X_val)}",
                 col=col1,
             )
-            
+
             st.balloons()
             st.snow()
-        
+
         elif data == "Testing data":
             model = _state.classifier
             X_test = _state.X_test
             edges_test = _state.edges_test
 
-            from gene_disease.edges.edge_predictions import predict, prediction_results
+            from gdap.edges.edge_predictions import predict, prediction_results
 
-            associated_proteins, non_associated_proteins = predict(
-                model, X_test, edges_test, threshold=threshold
-            )
-            associated_df, non_associated_df = prediction_results(
-                associated_proteins, non_associated_proteins
-            )
+            associated_proteins, non_associated_proteins = predict(model, X_test, edges_test, threshold=threshold)
+            associated_df, non_associated_df = prediction_results(associated_proteins, non_associated_proteins)
 
             persist("associated_df", associated_df)
             persist("non_associated_df", non_associated_df)
@@ -132,7 +117,7 @@ if prediction_button:
                 message=f"predictions for {_state['disease_name']} were made successfully!\n\nTesting Length: {len(X_test)}",
                 col=col1,
             )
-            
+
             st.balloons()
             st.snow()
 
@@ -143,9 +128,7 @@ if prediction_button:
 if check_state("associated_df", "non_associated_df"):
     tab1, tab2 = col2.tabs(["🗃 associated genes", "🗃 non-associated genes"])
 
-    expander = tab1.expander(
-        f"Click here to see associated genes to {_state['disease_name']}", expanded=True
-    )
+    expander = tab1.expander(f"Click here to see associated genes to {_state['disease_name']}", expanded=True)
     expander.dataframe(_state["associated_df"], width=1000)
 
     from streamlit_helpers.cache_data import convert_df

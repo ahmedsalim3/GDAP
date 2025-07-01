@@ -1,19 +1,22 @@
 ###################################################################################################################################
 #  Utility functions to save a classifier model to memory and provide a download button for exporting the model file.
-#  NOTE: TensorFlow models are not supported for download.  
+#  NOTE: TensorFlow models are not supported for download.
 ###################################################################################################################################
 
+import io
+
+import joblib
 import streamlit as st
 from streamlit import session_state as _state
-import io
-import joblib
-    
-def download_clasifer(classifier):
+
+
+def download_clasifer(classifier) -> None:
     _state.classifier_buffer = io.BytesIO()
     joblib.dump(classifier, _state.classifier_buffer)
     _state.classifier_buffer.seek(0)
-    
-def download_classifier_button():
+
+
+def download_classifier_button() -> None:
     if _state.classifier_options == "TensorFlow":
         return
 

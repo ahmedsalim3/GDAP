@@ -3,15 +3,14 @@
 ###################################################################################################################################
 
 import tensorflow as tf
-from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense, Dropout
+from tensorflow.keras.models import Sequential
 
 
 class TensorFlowModel:
-
     @staticmethod
     def to_constants(_state):
-        """Converts the data in the session state dictionary to TensorFlow constants"""
+        """Converts the data in the session state dictionary to TensorFlow constants."""
         return {
             "X_train": tf.constant(_state["X_train"]),
             "y_train": tf.constant(_state["y_train"]),
@@ -23,8 +22,7 @@ class TensorFlowModel:
 
     @staticmethod
     def train(X_train, y_train, X_test, y_test, tf_params):
-        """Trains a TensorFlow model using the provided training data and parameters"""
-
+        """Trains a TensorFlow model using the provided training data and parameters."""
         epochs = tf_params["epochs"]
         batch_size = tf_params["batch_size"]
         dropout_rate = tf_params["dropout_rate"]
@@ -43,17 +41,12 @@ class TensorFlowModel:
         if tf_params["learning_rate"] is not None:
             model.compile(
                 loss="binary_crossentropy",
-                optimizer=tf.keras.optimizers.Adam(
-                    learning_rate=tf_params["learning_rate"]
-                ),
+                optimizer=tf.keras.optimizers.Adam(learning_rate=tf_params["learning_rate"]),
                 metrics=["accuracy"],
             )
         else:
-            model.compile(
-                loss="binary_crossentropy", optimizer="adam", metrics=["accuracy"]
-            )
+            model.compile(loss="binary_crossentropy", optimizer="adam", metrics=["accuracy"])
 
-        print("Training sequential API model...")
 
         if batch_size is not None:
             history = model.fit(
@@ -74,13 +67,12 @@ class TensorFlowModel:
             )
 
         loss, acc = model.evaluate(X_test, y_test)
-        print(f"Test Accuracy: {acc:.4f}, Test Loss: {loss:.4f}")
 
         return model, history, acc, loss
 
     @staticmethod
     def valid(_state, threshold=0.5):
-        from gene_disease.models.model_training import validate_model
+        from gdap.models.model_training import validate_model
 
         return validate_model(
             model=_state["classifier"],
@@ -93,7 +85,7 @@ class TensorFlowModel:
         )
 
     @staticmethod
-    def evaluate(_state, threshold, data=None):
+    def evaluate(_state, threshold, data=None) -> None:
         from tools.model_evaluator import ModelEvaluator
 
         if data == "Validation Data":

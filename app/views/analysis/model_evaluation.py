@@ -7,9 +7,8 @@
 
 import streamlit as st
 from streamlit import session_state as _state
-
-from utils.state import check_state, manage_state
 from utils import ui as UI
+from utils.state import check_state, manage_state
 
 # from utils.style import page_layout
 
@@ -28,7 +27,7 @@ st.markdown(
 st.write(
     """
     DESCRIPTIVE TEXTS
-    
+
     """
 )
 
@@ -64,13 +63,9 @@ with col1.container(border=True):
 
 if evaluate_model:
     if not check_state("classifier"):
-        col1.error(
-            "No model has been trained yet. Please train a model before proceeding with evaluation"
-        )
+        col1.error("No model has been trained yet. Please train a model before proceeding with evaluation")
 
-    if check_state(
-        "previous_classifier", "X_test", "y_test", "X_val", "y_val", check_all=True):
-        
+    if check_state("previous_classifier", "X_test", "y_test", "X_val", "y_val", check_all=True):
         if _state["previous_classifier"] == "TensorFlow":
             from models.tesnorfloow import TensorFlowModel as TF
 
@@ -84,15 +79,15 @@ if evaluate_model:
             test_results, val_results = SK.valid(_state, threshold=threshold)
             with col1:
                 SK.evaluate(_state, threshold, evaluate_data)
-        
+
         UI.task_status("Evaluating Model", "✅")
         UI.results_status(
-            f"(Test Set)",
+            "(Test Set)",
             test_results,
             dict_name="model_results",
         )
         UI.results_status(
-            f"(Validation Set)",
+            "(Validation Set)",
             val_results,
             dict_name="model_results",
         )

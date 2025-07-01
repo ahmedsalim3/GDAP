@@ -2,25 +2,25 @@
 #  Utility functions for customizing Streamlit app layout, including footers, sidebar branding, and page styling.
 ###################################################################################################################################
 
-import streamlit as st
-
 from pathlib import Path
+
+import streamlit as st
 
 PROJ_ROOT = Path(__file__).resolve().parents[2]
 
 STEMAWAY_LOGO = str(PROJ_ROOT / "docs/icons/stemaway.svg")
 
 
-def footer():
+def footer() -> None:
     st.markdown(
         """
         <style>
-            .image { 
+            .image {
                 padding: 10px;
                 transition: transform .2s;
             }
 
-            .image:hover {  
+            .image:hover {
                 transform: scale(1.5);
                 transition: 0.2s;
             }
@@ -48,7 +48,7 @@ def footer():
             .footer a:hover {
                 text-decoration: underline;
             }
-            
+
         .footer p {
                 font-size: 13px;  /* Move the inline font-size here */
             }
@@ -70,8 +70,8 @@ def footer():
 
 page_style = """
     <style>
-        #MainMenu {visibility: hidden;} 
-        footer {visibility: hidden;} 
+        #MainMenu {visibility: hidden;}
+        footer {visibility: hidden;}
     </style>
 """
 
@@ -82,7 +82,7 @@ def page_layout(
     padding_right="0rem",
     padding_left="0rem",
     padding_bottom="0rem",
-):
+) -> None:
     st.markdown(
         f"""
         <style>
@@ -93,7 +93,7 @@ def page_layout(
                 padding-left: {padding_left};
                 padding-bottom: {padding_bottom};
             }}
-          
+
         </style>
         """,
         unsafe_allow_html=True,
@@ -108,8 +108,7 @@ def page_layout(
 #     )
 
 
-def sidebar_footer():
-
+def sidebar_footer() -> None:
     st.sidebar.markdown(
         """
         <style>

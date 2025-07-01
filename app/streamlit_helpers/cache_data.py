@@ -7,21 +7,21 @@ import streamlit as st
 
 @st.cache_resource
 def _GraphQLClient():
-    from gene_disease.datasets.open_targets import GraphQLClient
+    from gdap.datasets.open_targets import GraphQLClient
 
     return GraphQLClient()
 
 
 @st.cache_resource
 def _BigQueryClient():
-    from gene_disease.datasets.open_targets import BigQueryClient
+    from gdap.datasets.open_targets import BigQueryClient
 
     return BigQueryClient(deploy=True)
 
 
 @st.cache_resource
 def fetch_ppi_db(max_ppi_interactions):
-    from gene_disease.datasets.string_database import PPIData
+    from gdap.datasets.string_database import PPIData
 
     ppi_data = PPIData(max_ppi_interactions=max_ppi_interactions)
 
@@ -33,7 +33,7 @@ def fetch_ppi_db(max_ppi_interactions):
 
 @st.cache_resource(show_spinner=True)
 def _BiGraph():
-    from gene_disease.graphs import BiGraph
+    from gdap.graphs import BiGraph
 
     return BiGraph()
 
@@ -48,7 +48,7 @@ def fetch_graphql_data(disease_id):
 
 @st.cache_data
 def fetch_bq_direct_scores(params):
-    from gene_disease.datasets.open_targets import DIRECT_SCORES
+    from gdap.datasets.open_targets import DIRECT_SCORES
 
     bq_client = _BigQueryClient()
     ot_df = bq_client.execute_query(DIRECT_SCORES, params)
@@ -58,7 +58,7 @@ def fetch_bq_direct_scores(params):
 
 @st.cache_data
 def fetch_bq_indirect_scores(params):
-    from gene_disease.datasets.open_targets import INDIRECT_SCORES
+    from gdap.datasets.open_targets import INDIRECT_SCORES
 
     bq_client = _BigQueryClient()
     ot_df = bq_client.execute_query(INDIRECT_SCORES, params)
@@ -73,7 +73,6 @@ def convert_df(df):
 
 # @st.cache_data(allow_output_mutation=True)
 def create_graph(ot_df, ppi_df, top_pos, neg_to_pos):
-
     graph = _BiGraph()
     G, pos_edges, neg_edges = graph.create_graph(
         ot_df=ot_df,

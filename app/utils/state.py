@@ -8,7 +8,7 @@
 
 import streamlit as st
 from streamlit import session_state as _state
-
+from typing import Optional
 
 _PERSIST_STATE_KEY = f"{__name__.split('.')[-2]}_PERSIST"
 
@@ -29,16 +29,14 @@ def persist(key: str, value=None):
 
 
 def check_state(*keys, check_all=False):
-    """
-    Checks if either all or any of the provided keys exist in the session state and are not None.
-    """
+    """Checks if either all or any of the provided keys exist in the session state and are not None."""
     if check_all:
         return all(_state.get(key) is not None for key in keys)
     else:
         return any(_state.get(key) is not None for key in keys)
 
 
-def delete_state(*keys: str, delete_all: bool = False):
+def delete_state(*keys: str, delete_all: bool = False) -> None:
     """
     Delete a persisted key from the persistent state,
     or delete all if 'delete_all' is True.
@@ -52,15 +50,13 @@ def delete_state(*keys: str, delete_all: bool = False):
             _state.pop(key, None)
 
 
-def init_values(key, value=None):
-    """
-    Set a key in session state to a given value if it does not already exist.
-    """
+def init_values(key, value=None) -> None:
+    """Set a key in session state to a given value if it does not already exist."""
     if key not in _state:
         _state[key] = value
 
 
-def display_state(key: str = None, display_all: bool = False):
+def display_state(key: Optional[str] = None, display_all: bool = False) -> None:
     """Display session state based on the provided parameters."""
     if key is not None:
         if key in _state:
@@ -68,13 +64,13 @@ def display_state(key: str = None, display_all: bool = False):
         else:
             st.write(f"Key '{key}' not found.")
     elif display_all:
-        for key, value in _state.items():
-            st.write(f"**{key}:** {value}")
+        for state_key, value in _state.items():
+            st.write(f"**{str(state_key)}:** {value}")
     else:
         st.write("No state.")
 
 
-def display_persistent_state():
+def display_persistent_state() -> None:
     """Display only the persistent session state."""
     if _PERSIST_STATE_KEY in _state:
         keys = _state[_PERSIST_STATE_KEY]
@@ -86,12 +82,11 @@ def display_persistent_state():
         st.write("No persistent state.")
 
 
-def manage_state(container):
+def manage_state(container) -> None:
     if _PERSIST_STATE_KEY in _state:
         with container.expander("Manage Persistent State", expanded=False):
             keys = list(_state[_PERSIST_STATE_KEY])
             if keys:
-
                 option = st.radio(
                     "Choose an action",
                     ["Persisted Keys", "Current States", "Compare"],
@@ -99,16 +94,11 @@ def manage_state(container):
                 )
 
                 if option == "Persisted Keys":
-                    key = st.selectbox(
-                        f"Select a persisted key (total: `{len(keys)})`", keys
-                    )
+                    key = st.selectbox(f"Select a persisted key (total: `{len(keys)})`", keys)
                     right, left = st.columns(2)
                     value = _state.get(key, "Not initialized")
                     if (
-                        (
-                            isinstance(value, (str, list, dict))
-                            and len(str(value)) > 1000
-                        )
+                        (isinstance(value, (str, list, dict)) and len(str(value)) > 1000)
                         or (key == "ot_df")
                         or (key == "ppi_df")
                     ):
@@ -118,7 +108,7 @@ def manage_state(container):
                         if right.button("Values"):
                             st.write(f"{value}")
                     if left.button("Delete"):
-                        delete_state(key)
+                        delete_state(str(key))
                         st.success(f"Deleted {key} from persistent state.")
 
                 elif option == "Current States":
@@ -130,10 +120,7 @@ def manage_state(container):
                     right, left = st.columns(2)
                     value = _state.get(current_key, "Not initialized")
                     if (
-                        (
-                            isinstance(value, (str, list, dict))
-                            and len(str(value)) > 1000
-                        )
+                        (isinstance(value, (str, list, dict)) and len(str(value)) > 1000)
                         or (current_key == "ot_df")
                         or (current_key == "ppi_df")
                     ):
@@ -143,15 +130,15 @@ def manage_state(container):
                         if right.button("Values"):
                             st.write(f"{value}")
                     if left.button("Delete"):
-                        delete_state(current_key)
+                        delete_state(str(current_key))
                         st.success(f"Deleted {current_key} from session state.")
 
                 elif option == "Compare":
+                    persisted_keys_set = _state.get(_PERSIST_STATE_KEY, set())
+                    persisted_keys = set(str(k) for k in persisted_keys_set)
+                    current_keys_set = set(str(k) for k in _state.keys())
 
-                    persisted_keys = set(_state.get(_PERSIST_STATE_KEY, []))
-                    current_keys = set(_state.keys())
-
-                    missing_keys = current_keys - persisted_keys
+                    missing_keys = list(current_keys_set - persisted_keys)
                     if missing_keys:
                         st.write("Keys that are not persisted:")
                         st.write(missing_keys)

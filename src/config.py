@@ -1,6 +1,6 @@
 from pathlib import Path
-from gene_disease.datasets.open_targets import DIRECT_SCORES, INDIRECT_SCORES
 
+from gdap.datasets.open_targets import INDIRECT_SCORES
 
 PROJ_ROOT = Path(__file__).resolve().parents[1]
 
@@ -18,4 +18,6 @@ class Config:
     MODEL_NAME = "Logistic_Regression"  # Options: 'Random_Forest', 'Gradient_Boosting', 'SVM', 'Logistic_Regression'
     TEST_SIZE = 0.2  # Train/Test split ratio
     OUTPUT_DIR = PROJ_ROOT / "results/"  # Output folder path to save embeddings, models, predictions, etc.
-    CREDENTIALS = PROJ_ROOT / "configs/stemaway-d5a18133ff83.json"  # Credentials path if using BigQueryClient as a data source
+    CREDENTIALS = (
+        PROJ_ROOT / "configs/stemaway-d5a18133ff83.json"
+    )  # Credentials path if using BigQueryClient as a data source

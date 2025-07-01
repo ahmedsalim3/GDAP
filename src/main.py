@@ -1,4 +1,5 @@
 import os
+
 from config import Config
 
 
@@ -18,8 +19,8 @@ class GeneDisease:
 
     def load_data(self):
         """Load and process datasets (PPI and disease) based on configuration."""
-        from gene_disease.datasets.open_targets import BigQueryClient, GraphQLClient, DIRECT_SCORES, INDIRECT_SCORES
-        from gene_disease.datasets.string_database import PPIData
+        from gdap.datasets.open_targets import DIRECT_SCORES, INDIRECT_SCORES, BigQueryClient, GraphQLClient
+        from gdap.datasets.string_database import PPIData
 
         # Load PPI data
         ppi_data = PPIData(max_ppi_interactions=self.config.PPI_INTERACTIONS)
@@ -34,7 +35,9 @@ class GeneDisease:
 
             query = self.config.QUERY  # Should be set to either DIRECT_SCORES or INDIRECT_SCORES
             if query not in [DIRECT_SCORES, INDIRECT_SCORES]:
-                raise ValueError(f"Invalid query selected: {query}. It must be either DIRECT_SCORES or INDIRECT_SCORES.")
+                raise ValueError(
+                    f"Invalid query selected: {query}. It must be either DIRECT_SCORES or INDIRECT_SCORES."
+                )
             params = {"disease_id": self.config.DISEASE_ID}
             ot_df = bq_client.execute_query(query, params)
 
@@ -43,15 +46,20 @@ class GeneDisease:
 
     def create_graph(self, ppi_df, ot_df):
         """Create graph using PPI data and open-targets data."""
-        from gene_disease.graphs import BiGraph
+        from gdap.graphs import BiGraph
+
         G, pos_edges, neg_edges = BiGraph.create_graph(
-            ot_df, ppi_df, negative_to_positive_ratio=self.config.NEGATIVE_TO_POSITIVE_RATIO, output_dir=self.config.OUTPUT_DIR)
+            ot_df,
+            ppi_df,
+            negative_to_positive_ratio=self.config.NEGATIVE_TO_POSITIVE_RATIO,
+            output_dir=self.config.OUTPUT_DIR,
+        )
         BiGraph.visualize_sample_graph(G, ot_df, node_size=300, output_dir=self.config.OUTPUT_DIR)
         self.G, self.pos_edges, self.neg_edges = G, pos_edges, neg_edges
 
     def generate_embeddings(self):
         """Generate node embeddings for the graph."""
-        from gene_disease.embeddings import Node2Vec, ProNE, GGVec, EmbeddingGenerator
+        from gdap.embeddings import EmbeddingGenerator, GGVec, Node2Vec, ProNE
 
         save_path = os.path.join(self.config.OUTPUT_DIR, self.disease_name, "embedding_wheel/")
         os.makedirs(save_path, exist_ok=True)
@@ -76,10 +84,14 @@ class GeneDisease:
 
     def extract_features_labels(self, test_size):
         """Extract features, labels, and split data."""
-        from gene_disease.edges.edge_utils import features_labels_edges_idx, features_labels_edges, split_edge_data
-
         # Map nodes to index for embeddings
-        from gene_disease.edges.edge_utils import map_nodes
+        from gdap.edges.edge_utils import (
+            features_labels_edges,
+            features_labels_edges_idx,
+            map_nodes,
+            split_edge_data,
+        )
+
         self.node_to_index = map_nodes(self.G)
 
         if self.config.EMBEDDING_MODE == "degree_avg":
@@ -91,11 +103,13 @@ class GeneDisease:
 
     def train_and_evaluate_model(self, X_train, y_train, X_test, y_test, X_val, y_val):
         """Train and evaluate classification model."""
-        from gene_disease.models.models_dict import sklearn_models
-        from gene_disease.models.model_training import train_model, validate_model
         import joblib
+        from gdap.models.model_training import train_model, validate_model
+        from gdap.models.models_dict import sklearn_models
 
-        model, _ = train_model(sklearn_models[self.config.MODEL_NAME], X_train, y_train, model_name=self.config.MODEL_NAME)
+        model, _ = train_model(
+            sklearn_models[self.config.MODEL_NAME], X_train, y_train, model_name=self.config.MODEL_NAME
+        )
         test_results, val_results = validate_model(model, X_test, y_test, X_val, y_val, threshold=0.5)
 
         print(f"\n{self.config.MODEL_NAME} (Test Set):")
@@ -115,15 +129,27 @@ class GeneDisease:
 
     def plot_model_evaluation(self, model, X_val, y_val, models_path):
         """Plot model evaluation results."""
-        from gene_disease.models.model_evaluation import ModelEvaluation
-        Evaluation = ModelEvaluation(model, X_val, y_val, threshold=0.5, model_name=self.config.MODEL_NAME, figsize=(14, 12), output_dir=models_path)
+        from gdap.models.model_evaluation import ModelEvaluation
+
+        Evaluation = ModelEvaluation(
+            model,
+            X_val,
+            y_val,
+            threshold=0.5,
+            model_name=self.config.MODEL_NAME,
+            figsize=(14, 12),
+            output_dir=models_path,
+        )
         Evaluation.plot_evaluation()
 
     def predict_and_save_results(self, model, X_val, edges_val, models_path, threshold=0.5):
         """Make predictions and save results."""
-        from gene_disease.edges.edge_predictions import predict, prediction_results
+        from gdap.edges.edge_predictions import predict, prediction_results
+
         associated_proteins, non_associated_proteins = predict(model, X_val, edges_val, threshold=threshold)
-        associated_df, non_associated_df = prediction_results(associated_proteins, non_associated_proteins, output_dir=self.config.OUTPUT_DIR)
+        associated_df, non_associated_df = prediction_results(
+            associated_proteins, non_associated_proteins, output_dir=self.config.OUTPUT_DIR
+        )
         return associated_df, non_associated_df
 
 
@@ -131,7 +157,6 @@ class GeneDisease:
 #       MAIN EXECUTION
 # # ==========================
 if __name__ == "__main__":
-    
     # initialize the config
     config = Config()
 
@@ -148,7 +173,9 @@ if __name__ == "__main__":
     pipeline.generate_embeddings()
 
     # extract features and labels
-    X_train, y_train, X_val, y_val, X_test, y_test, edges_train, edges_val, edges_test = pipeline.extract_features_labels(config.TEST_SIZE)
+    X_train, y_train, X_val, y_val, X_test, y_test, edges_train, edges_val, edges_test = (
+        pipeline.extract_features_labels(config.TEST_SIZE)
+    )
 
     # train and evaluate model
     model, models_path = pipeline.train_and_evaluate_model(X_train, y_train, X_test, y_test, X_val, y_val)

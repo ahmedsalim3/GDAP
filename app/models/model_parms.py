@@ -18,11 +18,8 @@ from streamlit import session_state as _state
 
 
 def lr_param():
-    """Logistic Regression"""
-
-    solver = st.selectbox(
-        "Solver:", options=["lbfgs", "newton-cg", "liblinear", "sag", "saga"]
-    )
+    """Logistic Regression."""
+    solver = st.selectbox("Solver:", options=["lbfgs", "newton-cg", "liblinear", "sag", "saga"])
 
     if solver in ["newton-cg", "lbfgs", "sag"]:
         penalties = ["l2", "none"]
@@ -49,20 +46,11 @@ def lr_param():
 
 
 def rf_param():
-    """Random Forest"""
-
-    n_estimators = st.number_input(
-        "Number of Estimators:", min_value=1, max_value=500, value=50, step=1
-    )
-    max_depth = st.number_input(
-        "Max Depth of Trees:", min_value=1, max_value=50, value=10, step=1
-    )
-    min_samples_split = st.number_input(
-        "Min Samples Split:", min_value=1, value=10, step=1
-    )
-    min_samples_leaf = st.number_input(
-        "Min Samples Leaf:", min_value=1, value=5, step=1
-    )
+    """Random Forest."""
+    n_estimators = st.number_input("Number of Estimators:", min_value=1, max_value=500, value=50, step=1)
+    max_depth = st.number_input("Max Depth of Trees:", min_value=1, max_value=50, value=10, step=1)
+    min_samples_split = st.number_input("Min Samples Split:", min_value=1, value=10, step=1)
+    min_samples_leaf = st.number_input("Min Samples Leaf:", min_value=1, value=5, step=1)
     class_weight = st.selectbox("Class Weight:", options=["balanced", None])
     max_features = st.selectbox("Max Features:", options=[None, "auto", "sqrt", "log2"])
     criterion = st.selectbox("Criterion:", options=["gini", "entropy"])
@@ -81,17 +69,10 @@ def rf_param():
 
 
 def gb_param():
-    """Gradient Boosting"""
-
-    n_estimators = st.number_input(
-        "Number of Estimators:", min_value=1, max_value=500, value=50, step=1
-    )
-    max_depth = st.number_input(
-        "Max Depth of Estimators:", min_value=1, max_value=10, value=3, step=1
-    )
-    learning_rate = st.number_input(
-        "Learning Rate:", min_value=0.001, max_value=0.5, value=0.1, step=0.01
-    )
+    """Gradient Boosting."""
+    n_estimators = st.number_input("Number of Estimators:", min_value=1, max_value=500, value=50, step=1)
+    max_depth = st.number_input("Max Depth of Estimators:", min_value=1, max_value=10, value=3, step=1)
+    learning_rate = st.number_input("Learning Rate:", min_value=0.001, max_value=0.5, value=0.1, step=0.01)
     random_state = st.number_input("Random State:", value=42, step=1)
 
     return {
@@ -103,8 +84,7 @@ def gb_param():
 
 
 def svc_param():
-    """SVC classifier"""
-
+    """SVC classifier."""
     kernel = st.selectbox("Kernel:", options=["linear", "poly", "rbf", "sigmoid"])
     C = st.number_input(
         "Regularization Strength (C):",
@@ -125,8 +105,7 @@ def svc_param():
 
 
 def tf_param():
-    """TensorFlow model parameters"""
-
+    """TensorFlow model parameters."""
     epochs = st.number_input("Number of Epochs:", min_value=1, value=60, step=1)
 
     use_batch_size = st.checkbox("Specify Batch Size")
@@ -137,15 +116,11 @@ def tf_param():
 
     optimizer = st.checkbox("Use Learning Rate")
     if optimizer:
-        learning_rate = st.number_input(
-            "Learning Rate:", min_value=0.0001, max_value=0.1, value=0.001, step=0.0001
-        )
+        learning_rate = st.number_input("Learning Rate:", min_value=0.0001, max_value=0.1, value=0.001, step=0.0001)
     else:
         learning_rate = None
 
-    dropout_rate = st.number_input(
-        "Dropout Rate:", min_value=0.0, max_value=0.5, value=0.3, step=0.01
-    )
+    dropout_rate = st.number_input("Dropout Rate:", min_value=0.0, max_value=0.5, value=0.3, step=0.01)
 
     return {
         "epochs": epochs,
@@ -155,8 +130,7 @@ def tf_param():
     }
 
 
-def reset_tf_param(classifier_options, classifier):
-
+def reset_tf_param(classifier_options, classifier) -> None:
     if classifier_options == "TensorFlow" and (
         classifier["epochs"] != _state.get("epochs", None)
         or classifier["batch_size"] != _state.get("batch_size", None)

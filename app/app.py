@@ -2,13 +2,15 @@
 # Main entry point for the BI ML Disease Prediction app. Defines the page layout, navigation, and links to different app pages
 #######################################################################################################################################
 
-from pathlib import Path
-import streamlit as st
-from utils.style import footer, sidebar_footer
+import os
 
 # from utils.style import page_layout
 import sys
-import os
+from pathlib import Path
+
+import streamlit as st
+from utils.style import footer, sidebar_footer
+
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../src")))
 from streamlit.logger import get_logger
 
@@ -19,8 +21,7 @@ PROJ_ROOT = Path(__file__).resolve().parents[1]
 PAGE_ICON = str(PROJ_ROOT / "docs/icons/stemaway-32x32.png")
 
 
-def run():
-
+def run() -> None:
     # ================ MAIN PAGE SETUP ================
 
     st.set_page_config(
@@ -74,13 +75,9 @@ def run():
         icon=":material/chevron_right:",
     )
 
-    faqs_page = st.Page(
-        page="views/faqs.py", title="FAQs", icon=":material/chevron_right:"
-    )
+    faqs_page = st.Page(page="views/faqs.py", title="FAQs", icon=":material/chevron_right:")
 
-    about_page = st.Page(
-        page="views/about.py", title="About us", icon=":material/chevron_right:"
-    )
+    about_page = st.Page(page="views/about.py", title="About us", icon=":material/chevron_right:")
 
     pg = st.navigation(
         {

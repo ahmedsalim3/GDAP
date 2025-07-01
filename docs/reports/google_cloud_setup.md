@@ -13,7 +13,7 @@
 3. Set Up Google Cloud Credentials Locally (using `.env` or `direct path`)
 
     - [ ] **Option 1: Using `.env` File**
-   
+
         - Create a `.env` file in your project’s root directory (if it doesn't already exist).
         - Add the **full path** to your service account JSON key in the .env file:
 
@@ -26,21 +26,21 @@
             pip install python-dotenv
             ```
     - [ ] **Option 2: Using the environment variable GOOGLE_APPLICATION_CREDENTIALS**
-   
+
         - You can set this in your terminal or provide the the [`credentials_path`](./bigquery_client.py#L26) directly when initializeing the client
             - [ ] To set the GOOGLE_APPLICATION_CREDENTIALS environment variable through terminal, run these
 
                 ```sh
                 export GOOGLE_APPLICATION_CREDENTIALS='your_json_path_goes_here.json'
                 ```
-                
+
                 ```sh
                 echo $GOOGLE_APPLICATION_CREDENTIALS  # Verify it
                 unset GOOGLE_APPLICATION_CREDENTIALS  # Unset it
                 ```
-            
-            2. Provide 
-        
+
+            2. Provide
+
 4. Run the [main file](../main.py) to fetch the desired disease dataset
 
 ## Deployment
