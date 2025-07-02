@@ -1,0 +1,20 @@
+# Development Dockerfile for hot reloading and debugging
+FROM ghcr.io/astral-sh/uv:python3.12-bookworm-slim
+
+WORKDIR /app
+
+ENV UV_COMPILE_BYTECODE=1
+ENV SETUPTOOLS_SCM_PRETEND_VERSION=0.1.0
+
+COPY pyproject.toml uv.lock ./
+COPY src/ ./src/
+COPY app/ ./app/
+COPY docs/ ./docs/
+COPY .streamlit/ ./.streamlit/
+COPY streamlit_app.py ./
+
+RUN uv sync --locked
+
+EXPOSE 8501
+WORKDIR /app
+CMD ["uv", "run", "streamlit", "run", "streamlit_app.py", "--server.port=8501", "--server.address=0.0.0.0", "--server.runOnSave=true"]

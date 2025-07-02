@@ -1,20 +1,29 @@
-# Machine Learning - Gene-Disease Association Prediction App
-
-This project is composed of three levels:
-- Level 1: develop binary classification model focusing on only one disease (diabetes mellitus or breast cancer)
-- Level 2: integrate score/confidence level based on how much and type of evidence from OpenTargets and StringDB.
-- Level 3: generalize model to work with multiple diseases.
+# GDAP - Gene-Disease Association Prediction App
 
 
 ## Requirements
 
 To install and run the project, you will need:
-- **Python 3.x**: Ensure you have Python 3.x installed. You can download it from [python.org](https://www.python.org/).
-- **pip**: Python package installer should be available.
-- **Dependencies**: The project requires the Python packages listed in [requirements.txt](./requirements.txt).
+- **Python 3.11+**: Ensure you have Python 3.11 or higher installed. You can download it from [python.org](https://www.python.org/).
+- **uv**: Fast Python package installer and resolver. Install it from [uv.dev](https://uv.dev/).
+- **Dependencies**: The project requires the Python packages listed in [pyproject.toml](./pyproject.toml) and locked in [uv.lock](./uv.lock).
+
+## Quick Start
+
+The easiest way to get started is using the provided Makefile:
+
+```bash
+# Install dependencies
+make install
+
+# Run the Streamlit app
+make run-app
+
+# Run the main script
+make run-script
+```
 
 ## How to install
-
 
 1. **Clone the Repository** from terminal:
     ```bash
@@ -22,33 +31,15 @@ To install and run the project, you will need:
     cd BI-ML_Disease-Prediction_2024
     ```
 
-2. **Checkout to `ahmed` branch**:
+2. **Install Dependencies using uv**:
     ```bash
-    git checkout ahmed
-    git pull origin ahmed
+    # Install production dependencies
+    make install
+
+    # Or install with development tools
+    make install-dev
     ```
 
-3. **Create a Virtual Environment** (optional but recommended):
-    - On Linux/MacOS:
-        ```bash
-        python3 -m venv <envname> # <envname> is your environment name
-        source <envname>/bin/activate
-        ```
-    - On Windows:
-        ```bash
-        python -m venv <envname> # <envname> is your environment name
-        .\<envname>\Scripts\activate
-        ```
-    - Using Conda:
-        ```bash
-        conda create --name <envname> python=3.12.2 # <envname> is your environment name
-        conda activate <envname>
-        ```
-
-3. **Install Dependencies:**:
-    ```bash
-    pip install -r requirements.txt
-    ```
 ## How to Run the Script
 
 1. Go to [Open Target Platform](https://platform.opentargets.org/) and obtain the disease `EFO ID`.
@@ -58,86 +49,99 @@ To install and run the project, you will need:
 3. From the project root, run the script:
 
     ```bash
-    cd src/
-    python3 main.py
+    # Using Makefile (recommended)
+    make run-script
+
+    # Or using uv directly
+    uv run python src/main.py
     ```
 
 ## How to Run the App
 
-Running Locally
+### Running Locally
 
 1. Run the following command from the project root:
 
-    ```sh
-    # running as a module
-    python3 -m streamlit run app/app.py
-    ```
-    
-2. Alternatively, you can install the package and run it from the app directory:
+    ```bash
+    # Using Makefile (recommended)
+    make run-app
 
-    ```sh
-    pip install .
-    streamlit run app/Home.py
+<<<<<<< Updated upstream
+    # Or using uv directly
+    uv run streamlit run app/app.py
+=======
+    # Or using streamlit directly
+    streamlit run streamlit_app.py
+>>>>>>> Stashed changes
     ```
 
 ## Running the App via Docker
 
 To run the app using Docker, follow these steps:
 
-1. Build the Docker image:
+1. Build and run the Docker container:
 
-  ```sh
-  docker build -t image_name .
-  ```
+    ```bash
+    # Using Makefile (recommended)
+    make run-app-docker
 
-2. Run the Docker container:
+    # Or manually
+    docker build -t gdap .
+    docker run -p 8501:8501 gdap
+    ```
 
-  ```sh
-  docker run -p 8501:8501 image_name
-  ```
+## Available Make Commands
+
+```bash
+# Installation
+make install
+make install-dev
+
+# Development
+make fix
+make test
+make lint
+make format
+
+# Running Applications
+make run-script
+make run-app
+
+# Docker
+make run-app-docker
+make run-app-docker-dev
+
+# Cleanup
+make clean
+make clean-docker
+make clean-docker-all
+
+# Help
+make help
+```
 
 ## Repo's directory structure
 
 The directory structure below shows the nature of files/directories used in this repo.
 
 ```sh
-BI-ML_Disease-Prediction_2024
-├── CHANGELOG.md            <- Log of changes made
-├── README.md
-├── .gitignore              <- Specifies intentionally untracked files to ignore by git
-├── requirements.txt        <- Python dependencies
-├── start_app.sh            <- Streamlit app start script
-│
-│
-├── data                    <- Dir structure for data
-│   ├── external            <- Data from third party sources
-│   ├── interim             <- Intermediate data that has been transformed
-│   ├── processed           <- The final, canonical datasets and results
-│   └── raw                 <- The original, immutable data dump
-│
-├── docs                    <- Dir to store documentation
-│   ├── icons
-│   ├── images
-│   ├── index.md
-│   └── reports
-│
-├── notebooks               <- Jupyter notebooks and experiments
-│   ├── main.ipynb
-│   └── network-analysis.ipynb
-│
-├── src                     <- Source code for the project
-│   ├── config.py
-│   ├── gene_disease        <- Main package
-│   └── main.py
-│
-└── app                     <- Streamlit apps and associated files
-    ├── app.py              <- Streamlit app-1
-    ├── st_app.py           <- Streamlit app-2 (st_pages)
-    ├── models/
-    ├── streamlit_helpers/
-    ├── tools/
-    ├── utils/
-    └── views/
+GDAP/
+<<<<<<< Updated upstream
+=======
+├── streamlit_app.py        <- Main Streamlit entry point for deployment
+├── requirements.txt        <- Dependencies for Streamlit Cloud
+>>>>>>> Stashed changes
+├── app/                    <- Streamlit applications
+├── src/                    <- Source code
+│   ├── gdap/               <- Main package
+│   ├── config.py           <- Configuration
+│   └── main.py             <- Main script
+├── data/                   <- Data files
+├── docs/                   <- Documentation
+├── notebook/               <- Jupyter notebooks
+├── tests/                  <- Test files
+├── pyproject.toml          <- Project config
+└── Makefile                <- Build commands
 
 ```
 

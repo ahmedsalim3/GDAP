@@ -39,45 +39,45 @@ def run() -> None:
     # ================ PAGES ================
 
     home_page = st.Page(
-        page="views/home.py",
+        page="app/views/home.py",
         title="Home",
         icon=":material/home:",
         default=True,
     )
 
     data_fetcher_page = st.Page(
-        page="views/analysis/data_collection.py",
+        page="app/views/analysis/data_collection.py",
         title="Data Collection",
         icon=":material/chevron_right:",
     )
 
     graph_page = st.Page(
-        page="views/analysis/graph_construction.py",
+        page="app/views/analysis/graph_construction.py",
         title="Graph Construction",
         icon=":material/chevron_right:",
     )
 
     model_page = st.Page(
-        page="views/analysis/model_training.py",
+        page="app/views/analysis/model_training.py",
         title="Embedding/Model Selection",
         icon=":material/chevron_right:",
     )
 
     evaluation_page = st.Page(
-        page="views/analysis/model_evaluation.py",
+        page="app/views/analysis/model_evaluation.py",
         title="Model Evaluation",
         icon=":material/chevron_right:",
     )
 
     predictions_page = st.Page(
-        page="views/analysis/model_prediction.py",
+        page="app/views/analysis/model_prediction.py",
         title="Model Predictions",
         icon=":material/chevron_right:",
     )
 
-    faqs_page = st.Page(page="views/faqs.py", title="FAQs", icon=":material/chevron_right:")
+    faqs_page = st.Page(page="app/views/faqs.py", title="FAQs", icon=":material/chevron_right:")
 
-    about_page = st.Page(page="views/about.py", title="About us", icon=":material/chevron_right:")
+    about_page = st.Page(page="app/views/about.py", title="About us", icon=":material/chevron_right:")
 
     pg = st.navigation(
         {

@@ -2,6 +2,13 @@
 
 Here is a changelog format you could use. Feel free to choose a format that works for the repo and the pathway program.
 
+## [Unreleased]
+- Reorganized project structure for clarity and modularity
+- Updated Dockerfile and .dockerignore for new structure and uv/Makefile usage
+- Updated README to match new structure and Docker usage
+- Added Makefile and tests to Docker context
+- Removed legacy requirements.txt/start_app.sh references
+
 ```txt
 [2024-08-09] Ahmed
 * Added
