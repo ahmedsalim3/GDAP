@@ -25,7 +25,7 @@ def run() -> None:
     # ================ MAIN PAGE SETUP ================
 
     st.set_page_config(
-        page_title="BI ML Disease Prediction",
+        page_title="GDAP: Gene-Disease Association Prediction",
         page_icon=PAGE_ICON,
         initial_sidebar_state="expanded",
         layout="wide",

@@ -59,7 +59,7 @@ def footer() -> None:
             <a href="https://mentorchains.github.io/BI-ML_Disease-Prediction_2024_Site/">
                 <img class="image" src="https://d1xykt6w2ydx2s.cloudfront.net/optimized/2X/f/fb6a414e7a33edeea99be0fbc701a057b8351343_2_32x32.png" alt="github" width="50" height="50">
             </a>
-            <a href="https://github.com/mentorchains/BI-ML_Disease-Prediction_2024">
+            <a href="https://github.com/ahmedsalim3/gdap">
                 <img class="image" src="https://github.githubassets.com/assets/GitHub-Mark-ea2971cee799.png" alt="github" width="55" height="55">
             </a>
         </div>

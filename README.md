@@ -66,13 +66,8 @@ make run-script
     # Using Makefile (recommended)
     make run-app
 
-<<<<<<< Updated upstream
-    # Or using uv directly
-    uv run streamlit run app/app.py
-=======
     # Or using streamlit directly
     streamlit run streamlit_app.py
->>>>>>> Stashed changes
     ```
 
 ## Running the App via Docker
@@ -126,11 +121,8 @@ The directory structure below shows the nature of files/directories used in this
 
 ```sh
 GDAP/
-<<<<<<< Updated upstream
-=======
 ├── streamlit_app.py        <- Main Streamlit entry point for deployment
 ├── requirements.txt        <- Dependencies for Streamlit Cloud
->>>>>>> Stashed changes
 ├── app/                    <- Streamlit applications
 ├── src/                    <- Source code
 │   ├── gdap/               <- Main package
