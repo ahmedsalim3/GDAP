@@ -1,6 +1,14 @@
 # GDAP - Gene-Disease Association Prediction App
 
 
+<div align="center">
+  
+[[`Docs`](https://mentorchains.github.io/BI-ML_Disease-Prediction_2024_Site/)] [[`Streamlit App`](https://gdapdemo.streamlit.app/)]
+  
+</div>
+
+![](./docs/screenshots/home.png)
+
 ## Requirements
 
 To install and run the project, you will need:
